@@ -25,5 +25,9 @@ const electronHandler = {
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
+contextBridge.exposeInMainWorld('electronAPI', {
+  insertFriend: (name: String, publicKeys: any) =>
+    ipcRenderer.invoke('insert-friend', name, publicKeys),
+});
 
 export type ElectronHandler = typeof electronHandler;

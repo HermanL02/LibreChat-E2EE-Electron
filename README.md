@@ -9,6 +9,14 @@ NeDB - For keys local storage
 ## [Electron React Boilerplate](https://github.com/electron-react-boilerplate) included modules
 - Jest
 
+## IPC Transimission
+There is always a discussion about how do we implement the IPC transmission
+1. Electron Store NPM package could do
+2. Set NodeIntegration as True (which is not recommended for best practices)
+3. Put Window.require in the main file
+We Plan to use the third method in our project. 
+
 ## Exclude above
 - Tailwind CSS
 - NeDB - For keys local storage
+- Electron-store

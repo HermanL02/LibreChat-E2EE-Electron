@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import KeyStore from './components/keystore';
 
 class AppUpdater {
   constructor() {
@@ -24,7 +25,13 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
-
+ipcMain.handle('insert-friend', async (event, name, publicKeys) => {
+  try {
+    await KeyStore.insertFriend(name, publicKeys);
+  } catch (error) {
+    console.error(error);
+  }
+});
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
