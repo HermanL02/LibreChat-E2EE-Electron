@@ -1,42 +1,52 @@
-// KeyStore.ts
 import { friendsDB, personalDB } from './db';
 
 class KeyStore {
   // friends operations
-  static insertFriend(
+  static async insertFriend(
     name: string,
     publicKeys: [string, Date][],
-    callback: (err: Error | null, newDoc?: any) => void,
-  ) {
-    const doc = {
-      name,
-      publicKeys,
-    };
-
-    friendsDB.insert(doc, callback);
+  ): Promise<any> {
+    const doc = { name, publicKeys };
+    return new Promise((resolve, reject) => {
+      friendsDB.insert(doc, (err, newDoc) => {
+        if (err) reject(err);
+        else resolve(newDoc);
+      });
+    });
   }
 
-  static modifyKey(
+  static async modifyKey(
     _id: string,
     publicKeys: [string, Date][],
-    callback: (err: Error | null) => void,
-  ) {
+  ): Promise<void> {
     const doc = { publicKeys };
-    friendsDB.update({ _id }, { $set: doc }, { upsert: true }, callback);
+    return new Promise((resolve, reject) => {
+      friendsDB.update({ _id }, { $set: doc }, { upsert: true }, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
   }
 
-  static getKey(_id: string, callback: (err: Error | null, doc: any) => void) {
-    friendsDB.findOne({ _id }, callback);
+  static async getKey(_id: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      friendsDB.findOne({ _id }, (err, doc) => {
+        if (err) reject(err);
+        else resolve(doc);
+      });
+    });
   }
 
   // personal operations
-  static getPersonalKeys(callback: (err: Error | null, docs: any[]) => void) {
-    personalDB.find({}, (err: Error | null, docs: any[]) => {
-      if (err) {
-        callback(err, []);
-      } else {
-        callback(null, docs);
-      }
+  static async getPersonalKeys(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      personalDB.find(
+        {},
+        (err: Error | null, docs: any[] | PromiseLike<any[]>) => {
+          if (err) reject(err);
+          else resolve(docs);
+        },
+      );
     });
   }
 }

@@ -8,16 +8,11 @@ jest.mock('electron', () => ({
 }));
 
 describe('KeyStore', () => {
-  // eslint-disable-next-line jest/no-done-callback
-  it('should insert a friend', (done) => {
-    KeyStore.insertFriend(
-      'Alice',
-      [['key1', new Date()]],
-      (err: Error | null, newDoc: any) => {
-        expect(err).toBeNull();
-        expect(newDoc).toBeTruthy();
-        done();
-      },
-    );
+  it('should insert a friend', async () => {
+    const publicKeys: [string, Date][] = [['key1', new Date()]]; // 明确指定类型
+    const newFriend = await KeyStore.insertFriend('Alice', publicKeys);
+    expect(newFriend).toBeTruthy();
+    expect(newFriend.name).toBe('Alice');
+    expect(newFriend.publicKeys).toEqual(publicKeys);
   });
 });

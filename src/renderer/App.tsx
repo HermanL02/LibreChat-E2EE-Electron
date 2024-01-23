@@ -2,62 +2,35 @@
 // import icon from '../../assets/icon.svg';
 import './App.css';
 import 'tailwindcss/tailwind.css';
-import React, { useState } from 'react';
+import React from 'react';
+import { AppStateProvider, useAppState } from './AppStateContext';
+import ChatPage from './Components/chatpage';
+import ContactList from './Components/contactlist';
+import FunctionList from './Components/functionlist';
+import AddFriendPage from './Components/addfriend';
 // 定义 ContactList 的 Props 类型
-interface ContactListProps {
-  onSelectContact: (contact: string) => void;
-}
 
-function ContactList({ onSelectContact }: ContactListProps) {
-  const contacts = ['Alice', 'Bob', 'Charlie', 'David'];
+function ContentArea() {
+  const { selectedContact, currentPage } = useAppState();
 
   return (
-    <div className="flex flex-col bg-gray-100 p-4 shadow rounded-lg">
-      {contacts.map((contact) => (
-        <button
-          key={contact}
-          type="button"
-          className="p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0"
-          onClick={() => onSelectContact(contact)}
-        >
-          {contact}
-        </button>
-      ))}
+    <div className="ml-10">
+      {currentPage === 'chat' && selectedContact && (
+        <ChatPage contact={selectedContact} />
+      )}
+      {currentPage === 'addFriend' && <AddFriendPage />}
     </div>
   );
 }
 
-// 定义 ChatPage 的 Props 类型
-interface ChatPageProps {
-  contact: string;
-}
-
-function ChatPage({ contact }: ChatPageProps) {
+export default function Main() {
   return (
-    <div>
-      <h2>Chat with {contact}</h2>
-      <p>这里是与 {contact} 的聊天内容。</p>
-    </div>
-  );
-}
-
-function Hello() {
-  const [selectedContact, setSelectedContact] = useState<string | null>(null);
-
-  return (
-    <div className="flex">
-      <ContactList onSelectContact={setSelectedContact} />
-      <div className="ml-10">
-        {selectedContact && <ChatPage contact={selectedContact} />}
+    <AppStateProvider>
+      <div className="flex">
+        <FunctionList />
+        <ContactList />
+        <ContentArea />
       </div>
-    </div>
-  );
-}
-
-export default function App() {
-  return (
-    <div>
-      <Hello />
-    </div>
+    </AppStateProvider>
   );
 }
