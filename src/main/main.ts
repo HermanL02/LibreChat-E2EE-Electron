@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -26,11 +26,7 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 ipcMain.handle('insert-friend', async (event, name, publicKeys) => {
-  try {
-    await KeyStore.insertFriend(name, publicKeys);
-  } catch (error) {
-    console.error(error);
-  }
+  return KeyStore.insertFriend(name, publicKeys);
 });
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -113,7 +109,26 @@ const createWindow = async () => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
-
+  ipcMain.on('show-dialog', (event, arg) => {
+    if (mainWindow) {
+      const { title, message, type, buttons } = arg;
+      dialog
+        .showMessageBox(mainWindow, {
+          type,
+          title,
+          message,
+          buttons,
+        })
+        .then((result) => {
+          event.reply('dialog-response', result.response);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      console.log('Unable to show dialog，mainWindow == null。');
+    }
+  });
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();

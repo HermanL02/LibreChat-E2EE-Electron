@@ -12,9 +12,14 @@ export default function AddFriendPage() {
         friendName,
         publicKeys,
       );
-      console.log(response); // 处理响应
+      window.electron.ipcRenderer.sendMessage('show-dialog', {
+        title: 'Add friend',
+        buttons: ['OK'],
+        type: 'info',
+        message: 'Add friend successfully!',
+      });
+      console.log(response);
     } catch (error) {
-      console.log('clicked Button');
       console.error('Error adding friend:', error); // 错误处理
     }
   };

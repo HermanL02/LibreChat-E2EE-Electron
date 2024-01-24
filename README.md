@@ -1,6 +1,10 @@
+# Author
+Herman Liang
+
 # Reference
 This project uses [Electron React Boilerplate](https://github.com/electron-react-boilerplate) as the project template. 
 
+# Structure
 # Main Frameworks used
 Electron based on React and Node.js
 NeDB - For keys local storage

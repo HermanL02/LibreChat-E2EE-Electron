@@ -6,16 +6,13 @@ class KeyStore {
     name: string,
     publicKeys: [string, Date][],
   ): Promise<any> {
-    console.log('Inserting friend:', name, publicKeys);
     const doc = { name, publicKeys };
 
     return new Promise((resolve, reject) => {
       friendsDB.insert(doc, (err, newDoc) => {
         if (err) {
-          console.error('Error inserting friend:', err);
           reject(err);
         } else {
-          console.log('Friend inserted successfully:', newDoc);
           resolve(newDoc);
         }
       });
