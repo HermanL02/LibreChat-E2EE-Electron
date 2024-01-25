@@ -5,26 +5,31 @@ import { useAppState } from '../AppStateContext';
 export default function ContactList() {
   const { contacts, selectedContact, setSelectedContact, setCurrentPage } =
     useAppState();
-  const handleContactClick = (contact: string) => {
+
+  const handleContactClick = (contact: any) => {
     setCurrentPage('chat');
     setSelectedContact(contact);
   };
-  // In the case contact is not loaded yet
+
   if (!contacts) {
-    return <div>Loading contacts...</div>; // Or any other fallback UI
+    return <div>Loading contacts...</div>;
   }
+
   return (
     <div>
       {
         // @ts-ignore
         contacts.map((contact) => (
           <button
-            // eslint-disable-next-line
-          key={contact._id} // Assuming each contact has a unique '_id'
+            // eslint-disable-next-line no-underscore-dangle
+            key={contact._id}
             type="button"
             className={`flex items-center justify-start p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0 ${
-              contact.name === selectedContact ? 'bg-blue-200' : ''
-            } h-12`} // h-12 sets a fixed height of 3rem (48px)
+              // eslint-disable-next-line no-underscore-dangle
+              selectedContact && contact._id === selectedContact._id
+                ? 'bg-blue-100 rounded-md mb-2 ring-4 outline-none ring-blue-300 border-blue-700'
+                : 'text-blue-700 border border-blue-700'
+            } h-12`}
             onClick={() => handleContactClick(contact)}
           >
             {contact.name}
