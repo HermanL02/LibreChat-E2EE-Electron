@@ -8,6 +8,7 @@ export default function AddFriendPage() {
   const handleAddFriend = async () => {
     try {
       const publicKeys = [[key, new Date()]];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await window.electronAPI.insertFriend(
         friendName,
         publicKeys,
@@ -18,9 +19,13 @@ export default function AddFriendPage() {
         type: 'info',
         message: 'Add friend successfully!',
       });
-      console.log(response);
     } catch (error) {
-      console.error('Error adding friend:', error); // 错误处理
+      window.electron.ipcRenderer.sendMessage('show-dialog', {
+        title: 'Failed to Add friend',
+        buttons: ['OK', 'Report'],
+        type: 'info',
+        message: 'Failed to add. It is our problem, not yours.',
+      });
     }
   };
 

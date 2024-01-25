@@ -26,8 +26,16 @@ const electronHandler = {
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
 contextBridge.exposeInMainWorld('electronAPI', {
+  // keystore operations
   insertFriend: (name: String, publicKeys: any) =>
     ipcRenderer.invoke('insert-friend', name, publicKeys),
+  // encryptor operations
+  encrypt: (text: string, publicKey: string) =>
+    ipcRenderer.invoke('encrypt', text, publicKey),
+  decrypt: (encryptedText: string, privateKey: string) =>
+    ipcRenderer.invoke('decrypt', encryptedText, privateKey),
+  generateKeyPair: () => ipcRenderer.invoke('generate-key-pair'),
+  getAllFriends: () => ipcRenderer.invoke('get-all-friends'),
 });
 
 export type ElectronHandler = typeof electronHandler;

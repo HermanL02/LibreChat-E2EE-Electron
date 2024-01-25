@@ -1,5 +1,9 @@
 import { friendsDB, personalDB } from './db';
 
+type Friend = {
+  name: string;
+  publicKeys: [string, Date][];
+};
 class KeyStore {
   // friends operations
   static async insertFriend(
@@ -14,6 +18,18 @@ class KeyStore {
           reject(err);
         } else {
           resolve(newDoc);
+        }
+      });
+    });
+  }
+
+  static async getAllFriends(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      friendsDB.find({}, (err: Error, docs: Friend[]) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(docs);
         }
       });
     });

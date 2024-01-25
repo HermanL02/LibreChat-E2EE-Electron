@@ -9,13 +9,20 @@ export const useAppState = () => useContext(AppStateContext);
 export function AppStateProvider({ children }) {
   const [selectedContact, setSelectedContact] = useState(null);
   const [currentPage, setCurrentPage] = useState('chat'); // 'chat', 'other'
-
+  const [contacts, setContacts] = useState([]);
+  const getAllFriends = async () => {
+    const newContacts = await window.electronAPI.getAllFriends();
+    setContacts(newContacts);
+  };
   // eslint-disable-next-line react/jsx-no-constructed-context-values
   const contextValue = {
     selectedContact,
     setSelectedContact,
     currentPage,
     setCurrentPage,
+    contacts,
+    setContacts,
+    getAllFriends,
   };
 
   return (

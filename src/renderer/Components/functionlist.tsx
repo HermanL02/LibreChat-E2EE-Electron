@@ -10,17 +10,17 @@ export default function FunctionList() {
   };
 
   return (
-    <div className="flex flex-col bg-gray-100 p-4 shadow rounded-lg">
+    <div>
       <button
         type="button"
-        className="p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0"
+        className="flex items-center justify-start p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0 h-12"
         onClick={() => handleFunctionClick('addFriend')}
       >
         Add a friend
       </button>
       <button
         type="button"
-        className="p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0"
+        className="flex items-center justify-start p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0 h-12"
         onClick={() => handleFunctionClick('importFriend')}
       >
         Import

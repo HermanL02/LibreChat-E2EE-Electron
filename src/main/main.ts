@@ -25,9 +25,13 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+ipcMain.handle('get-all-friends', async () => {
+  return KeyStore.getAllFriends();
+});
 ipcMain.handle('insert-friend', async (event, name, publicKeys) => {
   return KeyStore.insertFriend(name, publicKeys);
 });
+
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
