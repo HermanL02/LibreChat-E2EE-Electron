@@ -5,7 +5,7 @@ import usePersonalKeys from './subComponents/usePersonalKeys';
 interface ChatPageProps {
   contact: {
     name: string;
-    publicKey: string;
+    publicKeys: Array<{ date: number; publickey: string }>;
   };
 }
 
@@ -18,9 +18,18 @@ export default function ChatPage({ contact }: ChatPageProps) {
     setMessage(event.target.value);
     event.target.style.height = 'inherit';
     event.target.style.height = `${event.target.scrollHeight}px`;
-    console.log(contact);
   };
+  const retrieveLatestContactPublicKey = () => {
+    if (!contact.publicKeys || contact.publicKeys.length === 0) {
+      return null;
+    }
 
+    // Sort the public keys by date in descending order (latest first)
+    const sortedPublicKeys = contact.publicKeys.sort((a, b) => b.date - a.date);
+
+    // Return the latest public key
+    return sortedPublicKeys[0].publickey;
+  };
   const encryptDecryptMessage = async () => {
     if (isEncrypted) {
       // Decrypt
@@ -41,11 +50,18 @@ export default function ChatPage({ contact }: ChatPageProps) {
     } else {
       // Encrypt
       try {
-        const response = await window.electronAPI.encrypt(
-          message,
-          contact.publicKey,
-        );
-        setMessage(response);
+        const latestPublicKey = retrieveLatestContactPublicKey();
+        if (latestPublicKey) {
+          // latestPublicKey is not null, proceed with encryption
+          const response = await window.electronAPI.encrypt(
+            message,
+            latestPublicKey,
+          );
+          setMessage(response);
+        } else {
+          // latestPublicKey is null, handle this case appropriately
+          // You might want to show an error message to the user or take some other action
+        }
       } catch (error) {
         window.electron.ipcRenderer.sendMessage('show-dialog', {
           title: 'Failed to encrypt message',
