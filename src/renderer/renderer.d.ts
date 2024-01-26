@@ -6,6 +6,8 @@ export interface IElectronAPI {
   decrypt: (encryptedText: string, privateKey: string) => Promise<string>;
   generateKeyPair: () => Promise<{ publicKey: string; privateKey: string }>;
   getAllFriends: () => Promise<any[]>;
+  updatePersonalKeys: () => Promise<any>;
+  getPersonalKeys: () => Promise<any>;
 }
 
 declare global {

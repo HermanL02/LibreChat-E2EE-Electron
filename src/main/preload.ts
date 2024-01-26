@@ -36,6 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('decrypt', encryptedText, privateKey),
   generateKeyPair: () => ipcRenderer.invoke('generate-key-pair'),
   getAllFriends: () => ipcRenderer.invoke('get-all-friends'),
+  updatePersonalKeys: () => ipcRenderer.invoke('update-personal-keys'),
+  getPersonalKeys: () => ipcRenderer.invoke('get-personal-keys'),
 });
 
 export type ElectronHandler = typeof electronHandler;

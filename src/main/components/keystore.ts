@@ -1,5 +1,6 @@
 import { friendsDB, personalDB } from './db';
-
+import Encryptor from './encryptor';
+// 等待重构这个，因为我想把date统一放在后端生成
 type Friend = {
   name: string;
   publicKeys: [string, Date][];
@@ -58,6 +59,21 @@ class KeyStore {
   }
 
   // personal operations
+  static async updatePersonalKeys(): Promise<any> {
+    const { publicKey, privateKey } = Encryptor.generateKeyPair();
+    const doc = { publicKey, privateKey, date: new Date().getTime() };
+
+    return new Promise((resolve, reject) => {
+      personalDB.insert(doc, (err, newDoc) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(newDoc);
+        }
+      });
+    });
+  }
+
   static async getPersonalKeys(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       personalDB.find(
