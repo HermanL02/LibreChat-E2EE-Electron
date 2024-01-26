@@ -7,12 +7,8 @@ export default function AddFriendPage() {
 
   const handleAddFriend = async () => {
     try {
-      const publicKeys = [[key, new Date()]];
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const response = await window.electronAPI.insertFriend(
-        friendName,
-        publicKeys,
-      );
+      const response = await window.electronAPI.insertFriend(friendName, key);
       window.electron.ipcRenderer.sendMessage('show-dialog', {
         title: 'Add friend',
         buttons: ['OK'],

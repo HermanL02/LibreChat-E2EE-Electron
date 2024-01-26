@@ -15,6 +15,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import KeyStore from './components/keystore';
+import Encryptor from './components/encryptor';
 
 class AppUpdater {
   constructor() {
@@ -28,14 +29,20 @@ let mainWindow: BrowserWindow | null = null;
 ipcMain.handle('get-all-friends', async () => {
   return KeyStore.getAllFriends();
 });
-ipcMain.handle('insert-friend', async (event, name, publicKeys) => {
-  return KeyStore.insertFriend(name, publicKeys);
+ipcMain.handle('insert-friend', async (event, name, publicKey) => {
+  return KeyStore.insertFriend(name, publicKey);
 });
 ipcMain.handle('update-personal-keys', async () => {
   return KeyStore.updatePersonalKeys();
 });
 ipcMain.handle('get-personal-keys', async () => {
   return KeyStore.getPersonalKeys();
+});
+ipcMain.handle('encrypt', async (event, text, publicKey) => {
+  return Encryptor.encrypt(text, publicKey);
+});
+ipcMain.handle('decrypt', async (event, text, privateKey) => {
+  return Encryptor.decrypt(text, privateKey);
 });
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;

@@ -7,10 +7,9 @@ type Friend = {
 };
 class KeyStore {
   // friends operations
-  static async insertFriend(
-    name: string,
-    publicKeys: [string, Date][],
-  ): Promise<any> {
+  static async insertFriend(name: string, publickey: string): Promise<any> {
+    const date = new Date().getTime();
+    const publicKeys = [{ publickey, date }];
     const doc = { name, publicKeys };
 
     return new Promise((resolve, reject) => {

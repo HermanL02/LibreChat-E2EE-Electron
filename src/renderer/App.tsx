@@ -30,7 +30,6 @@ export default function Main() {
   return (
     <AppStateProvider>
       <div className="flex flex-col">
-        {/* 顶部按钮区域 */}
         <div className="flex justify-center items-center space-x-4 py-4">
           <button
             type="button"
@@ -42,11 +41,16 @@ export default function Main() {
             type="button"
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
           >
-            WeChat Contacts
+            Cloud Contacts
+          </button>
+          <button
+            type="button"
+            className="bg-purple-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            WeChat Direct Messsage (Alpha)
           </button>
         </div>
 
-        {/* 主内容区域 */}
         <div className="flex flex-grow">
           <div className="flex flex-col bg-gray-100 p-4 shadow rounded-lg w-1/5">
             <p className="text-sm font-semibold text-gray-700 mb-4">
