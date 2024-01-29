@@ -24,3 +24,16 @@ We Plan to use the third method in our project.
 - Tailwind CSS
 - NeDB - For keys local storage
 - Electron-store
+
+
+
+# 构思
+1. Normal Contacts
+本地存储，本地加解密
+2. Cloud Contacts
+上传自己的wxid与union ID绑定，确保用户不会恶意重复注册，防止数据库爆炸
+可以设置每次登录自动同步本机的personal public key，其他用户可通过wxid搜索到对应人的公钥，从而给他发加密消息
+3. WeChat Connection Alpha
+通过WeChat，与其他使用相同应用的好友, 直接发加密消息，接收加密消息，自动无感加解密
+(自动搜索云端来实时通过wxid更新对方的public key? 或者手动更新? )
+
