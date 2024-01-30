@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAllFriends: () => ipcRenderer.invoke('get-all-friends'),
   updatePersonalKeys: () => ipcRenderer.invoke('update-personal-keys'),
   getPersonalKeys: () => ipcRenderer.invoke('get-personal-keys'),
+  checkWechatLogin: () => ipcRenderer.invoke('check-wechat-login'),
 });
 
 export type ElectronHandler = typeof electronHandler;

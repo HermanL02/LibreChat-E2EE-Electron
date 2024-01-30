@@ -16,6 +16,9 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import KeyStore from './components/keystore';
 import Encryptor from './components/encryptor';
+import HookDirect from './components/hookdirect';
+
+// set global variables
 
 class AppUpdater {
   constructor() {
@@ -26,6 +29,7 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+// IPC handlers
 ipcMain.handle('get-all-friends', async () => {
   return KeyStore.getAllFriends();
 });
@@ -43,6 +47,9 @@ ipcMain.handle('encrypt', async (event, text, publicKey) => {
 });
 ipcMain.handle('decrypt', async (event, text, privateKey) => {
   return Encryptor.decrypt(text, privateKey);
+});
+ipcMain.handle('check-wechat-login', async () => {
+  return HookDirect.checkLogin();
 });
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;

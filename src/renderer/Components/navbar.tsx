@@ -23,7 +23,7 @@ function Navbar() {
       <button
         type="button"
         className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
-        onClick={() => navigate('/WeChatConnection')}
+        onClick={() => navigate('/WeChatOperation')}
       >
         WeChat Direct Message (Alpha)
       </button>

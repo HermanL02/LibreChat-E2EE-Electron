@@ -13,9 +13,7 @@ const usePersonalKeys = () => {
   const getPersonalKeys = async () => {
     const response = await window.electronAPI.getPersonalKeys();
     setPersonalKeys(response);
-    // 将响应按日期时间戳从早到晚排序
     const sortedByDate = response.sort((a: any, b: any) => a.date - b.date);
-    // 获取时间戳最晚的元素
     const latestEntry = sortedByDate[sortedByDate.length - 1];
     setlatestPersonalKey(latestEntry);
   };

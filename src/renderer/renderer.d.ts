@@ -8,6 +8,7 @@ export interface IElectronAPI {
   getAllFriends: () => Promise<any[]>;
   updatePersonalKeys: () => Promise<any>;
   getPersonalKeys: () => Promise<any>;
+  checkWechatLogin: () => Promise<any>;
 }
 
 declare global {

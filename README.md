@@ -24,6 +24,8 @@ We Plan to use the third method in our project.
 - Tailwind CSS
 - NeDB - For keys local storage
 - Electron-store
+- axios - Used to access api
+- express - Used to access 
 
 
 
