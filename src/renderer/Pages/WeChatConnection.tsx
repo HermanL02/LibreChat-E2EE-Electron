@@ -1,17 +1,18 @@
 // AnotherPage.tsx
 
 import React from 'react';
+import Navbar from '../Components/navbar';
 
 function WeChatConnection() {
   return (
     <div>
-      <h1>Follow the Instructions to hook WeChat easily! (Instruction TBD) </h1>
+      <Navbar />
+      <h1>Before click on this button, Hook WeChat first. </h1>
       <button
         type="button"
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
-        I have finished the instruction and want to connect WeChat. I understand
-        the risk of using this software.
+        Connect to WeChat
       </button>
     </div>
   );
