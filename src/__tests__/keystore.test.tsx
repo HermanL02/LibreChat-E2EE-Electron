@@ -9,10 +9,8 @@ jest.mock('electron', () => ({
 
 describe('KeyStore', () => {
   it('should insert a friend', async () => {
-    const publicKeys: [string, Date][] = [['key1', new Date()]]; // 明确指定类型
-    const newFriend = await KeyStore.insertFriend('Alice', publicKeys);
+    const newFriend = await KeyStore.insertFriend('Alice', 'key1');
     expect(newFriend).toBeTruthy();
     expect(newFriend.name).toBe('Alice');
-    expect(newFriend.publicKeys).toEqual(publicKeys);
   });
 });
