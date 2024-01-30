@@ -5,7 +5,7 @@ type Friend = {
   name: string;
   publicKeys: [string, Date][];
 };
-class KeyStore {
+export default class KeyStore {
   // friends operations
   static async insertFriend(name: string, publickey: string): Promise<any> {
     const date = new Date().getTime();
@@ -85,5 +85,3 @@ class KeyStore {
     });
   }
 }
-
-export default KeyStore;
