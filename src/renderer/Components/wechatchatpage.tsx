@@ -14,29 +14,36 @@ type Message = {
   type: number;
 };
 export default function WeChatChatInterface() {
-  const [username, setUsername] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-
-  const [newMessage, setNewMessage] = useState('');
-
+  const [listening, setListening] = useState(false);
   useEffect(() => {
     window.electronAPI.receiveMessage((message: Message) => {
       console.log('Message from main process:', message);
-
+      if (listening) {
+        if (message.content.includes('RSA')) {
+          // redirect to a new page
+        }
+      }
       // 直接将接收到的消息对象添加到 messages 数组中
-      setMessages((prevMessages) => [...prevMessages, message]);
+      setMessages((prevMessages) => {
+        if (
+          prevMessages.some(
+            (prevMessage) => prevMessage.msgId === message.msgId,
+          )
+        ) {
+          console.warn(`Duplicate message id detected: ${message.msgId}`);
+          return prevMessages; // 如果存在，不添加重复的消息
+        }
+        return [...prevMessages, message]; // 如果不存在，添加新消息
+      });
     });
-  }, []);
-  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUsername(event.target.value);
+  }, [listening]);
+  const ListenForPublicKey = async () => {
+    setListening(true);
   };
-  const handleNewMessageChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setNewMessage(event.target.value);
+  const SendPublicKeyAndStartChat = async () => {
+    setListening(false);
   };
-
-  const sendMessage = () => {};
   let sharedPortUse = 3000;
   window.electron.ipcRenderer.on(
     'response-shared-port',
@@ -94,15 +101,17 @@ export default function WeChatChatInterface() {
           Unhook
         </button>
       </div>
-
-      <input
-        type="text"
-        className="input input-bordered input-xs w-full max-w-xs"
-        placeholder="Input the Username you want to talk to"
-        value={username}
-        onChange={handleUsernameChange}
-      />
-
+      <button onClick={ListenForPublicKey} type="button">
+        Listen for a temporary encrypt chat
+      </button>
+      {listening ? <p>Listening to RSA public keys</p> : null}
+      <button
+        onClick={SendPublicKeyAndStartChat}
+        value="Start a temporary encrypt chat"
+        type="button"
+      >
+        Start a temporary encrypt chat
+      </button>
       <div className="bg-gray-100 p-4 my-4 h-64 overflow-y-auto">
         {messages.map((message) => (
           // eslint-disable-next-line react/no-array-index-key
@@ -110,19 +119,6 @@ export default function WeChatChatInterface() {
             {message.content}
           </div>
         ))}
-      </div>
-
-      <div className="flex">
-        <input
-          type="text"
-          className="input input-bordered flex-1"
-          placeholder="Type a message..."
-          value={newMessage}
-          onChange={handleNewMessageChange}
-        />
-        <button type="button" onClick={sendMessage} className="btn ml-2">
-          Send
-        </button>
       </div>
     </div>
   );
