@@ -12,14 +12,33 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import express, { Request, Response } from 'express';
+import { Server } from 'http';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import KeyStore from './components/keystore';
 import Encryptor from './components/encryptor';
 import HookDirect from './components/hookdirect';
-
 // set global variables
-
+const globalAny: any = global;
+globalAny.sharedPort = 3000;
+globalAny.hooked = false;
+const newExpressServer = express();
+newExpressServer.use(express.json());
+const server: Server = newExpressServer.listen(globalAny.sharedPort, () => {
+  console.log(`Server listening at http://localhost:${globalAny.sharedPort}`);
+});
+server.on('error', (error: any) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${globalAny.sharedPort} is already in use.`);
+    // 尝试另一个端口
+    server.close();
+    globalAny.sharedPort += 1;
+    server.listen(globalAny.sharedPort);
+  } else {
+    console.error(error);
+  }
+});
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -30,6 +49,11 @@ class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 // IPC handlers
+ipcMain.on('request-shared-port', (event) => {
+  console.log(globalAny.sharedPort);
+  event.reply('response-shared-port', globalAny.sharedPort);
+});
+
 ipcMain.handle('get-all-friends', async () => {
   return KeyStore.getAllFriends();
 });
@@ -50,6 +74,9 @@ ipcMain.handle('decrypt', async (event, text, privateKey) => {
 });
 ipcMain.handle('check-wechat-login', async () => {
   return HookDirect.checkLogin();
+});
+ipcMain.handle('hook-wechat', async (event, hookSettings) => {
+  return HookDirect.hookMessage(hookSettings);
 });
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
@@ -160,7 +187,14 @@ const createWindow = async () => {
 /**
  * Add event listeners...
  */
-
+newExpressServer.post('/', (req: Request, res: Response) => {
+  console.log(globalAny.hooked);
+  console.log(req.body);
+  if (mainWindow) {
+    mainWindow.webContents.send('displayMessage', req.body);
+  }
+  res.status(200).send('Message received');
+});
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed

@@ -9,6 +9,8 @@ export interface IElectronAPI {
   updatePersonalKeys: () => Promise<any>;
   getPersonalKeys: () => Promise<any>;
   checkWechatLogin: () => Promise<any>;
+  hookWechat: (hookSettings: any) => Promise<any>;
+  receiveMessage: (callback: any) => Promise<any>;
 }
 
 declare global {

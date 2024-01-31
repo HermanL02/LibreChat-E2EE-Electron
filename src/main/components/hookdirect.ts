@@ -47,7 +47,7 @@ export default class HookDirect {
         timeout: hookSettings.timeout,
         enableHttp: hookSettings.enableHttp,
       };
-
+      console.log(requestBody);
       // 发送POST请求
       const response: AxiosResponse<HookResponse> = await axios.post(
         'http://0.0.0.0:19088/api/hookSyncMsg', // hook的API地址

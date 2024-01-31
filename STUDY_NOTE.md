@@ -34,3 +34,8 @@ BigOldWei provided information.
 From the doc below: We have to add one more file renderer.d.ts to loadhttps://www.electronjs.org/docs/latest/tutorial/context-isolation#usage-with-typescript
 ## IPC handler? Where to put? 
 [It does not need to be included in the createWindow() function scope. That is just the way the person wrote it in the Doc’s.](https://stackoverflow.com/questions/71266876/is-there-a-reason-they-put-the-ipcmain-on-event-listener-inside-the-createwind)
+# global.d.ts
+declare global {
+    function someFunction(): string;
+    var someVariable: string;
+}

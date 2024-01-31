@@ -2,7 +2,11 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'show-dialog';
+export type Channels =
+  | 'ipc-example'
+  | 'show-dialog'
+  | 'request-shared-port'
+  | 'response-shared-port';
 
 const electronHandler = {
   ipcRenderer: {
@@ -39,6 +43,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updatePersonalKeys: () => ipcRenderer.invoke('update-personal-keys'),
   getPersonalKeys: () => ipcRenderer.invoke('get-personal-keys'),
   checkWechatLogin: () => ipcRenderer.invoke('check-wechat-login'),
+  hookWechat: (hookSettings: any) =>
+    ipcRenderer.invoke('hook-wechat', hookSettings),
+  receiveMessage: (callback: any) =>
+    ipcRenderer.on('displayMessage', (event, message) => callback(message)),
 });
 
 export type ElectronHandler = typeof electronHandler;
