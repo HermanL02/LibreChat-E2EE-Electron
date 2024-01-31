@@ -14,10 +14,9 @@ import { useWeChatMessages } from '../WeChatMessageContext';
 //   toUser: string;
 //   type: number;
 // };
-export default function WeChatChatInterface() {
+export default function WeChatHook() {
   const { messages, listening, listenForPublicKey, sendPublicKeyAndStartChat } =
     useWeChatMessages();
-
   let sharedPortUse = 3000;
   window.electron.ipcRenderer.on(
     'response-shared-port',

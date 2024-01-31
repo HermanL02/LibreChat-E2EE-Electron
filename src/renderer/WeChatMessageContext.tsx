@@ -48,11 +48,9 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     window.electronAPI.receiveMessage((message: Message) => {
       console.log('Message from main process:', message);
-      console.log('redirecting 1');
       if (listening) {
         if (message.content.includes('RSA')) {
           if (message.fromUser !== '') {
-            console.log('redirecting to chat page');
             navigate('/WeChatOperation/ChatPage', {
               state: { info: message },
             });

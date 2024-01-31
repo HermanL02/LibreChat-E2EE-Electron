@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import WeChatConnection from '../Components/wechatconnection';
 import Navbar from '../Components/navbar';
-import WeChatChatInterface from '../Components/wechatchatpage';
+import WeChatHook from '../Components/wechathook';
 import { WeChatMessageProvider } from '../WeChatMessageContext';
 
 export default function WeChatOperation() {
@@ -12,7 +12,7 @@ export default function WeChatOperation() {
       <WeChatMessageProvider>
         <Navbar />
         {!isConnected && <WeChatConnection setIsConnected={setIsConnected} />}
-        {isConnected && <WeChatChatInterface />}
+        {isConnected && <WeChatHook />}
       </WeChatMessageProvider>
     </div>
   );
