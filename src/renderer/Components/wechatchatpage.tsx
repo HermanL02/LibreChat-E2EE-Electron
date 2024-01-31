@@ -1,49 +1,23 @@
 import 'tailwindcss/tailwind.css';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useWeChatMessages } from '../WeChatMessageContext';
 
-type Message = {
-  content: string;
-  createTime: number;
-  displayFullContent: string;
-  fromUser: string;
-  msgId: number;
-  msgSequence: number;
-  pid: number;
-  signature: string;
-  toUser: string;
-  type: number;
-};
+// type Message = {
+//   content: string;
+//   createTime: number;
+//   displayFullContent: string;
+//   fromUser: string;
+//   msgId: number;
+//   msgSequence: number;
+//   pid: number;
+//   signature: string;
+//   toUser: string;
+//   type: number;
+// };
 export default function WeChatChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [listening, setListening] = useState(false);
-  useEffect(() => {
-    window.electronAPI.receiveMessage((message: Message) => {
-      console.log('Message from main process:', message);
-      if (listening) {
-        if (message.content.includes('RSA')) {
-          // redirect to a new page
-        }
-      }
-      // 直接将接收到的消息对象添加到 messages 数组中
-      setMessages((prevMessages) => {
-        if (
-          prevMessages.some(
-            (prevMessage) => prevMessage.msgId === message.msgId,
-          )
-        ) {
-          console.warn(`Duplicate message id detected: ${message.msgId}`);
-          return prevMessages; // 如果存在，不添加重复的消息
-        }
-        return [...prevMessages, message]; // 如果不存在，添加新消息
-      });
-    });
-  }, [listening]);
-  const ListenForPublicKey = async () => {
-    setListening(true);
-  };
-  const SendPublicKeyAndStartChat = async () => {
-    setListening(false);
-  };
+  const { messages, listening, listenForPublicKey, sendPublicKeyAndStartChat } =
+    useWeChatMessages();
+
   let sharedPortUse = 3000;
   window.electron.ipcRenderer.on(
     'response-shared-port',
@@ -53,10 +27,7 @@ export default function WeChatChatInterface() {
     },
   );
   window.electron.ipcRenderer.sendMessage('request-shared-port');
-  const globalAny: any = global;
-  console.log(globalAny.sharedPort);
   const url = `http://localhost:${sharedPortUse}`;
-  console.log(url);
   const hookWechat = async () => {
     const hooksettings = {
       port: '19099',
@@ -101,12 +72,12 @@ export default function WeChatChatInterface() {
           Unhook
         </button>
       </div>
-      <button onClick={ListenForPublicKey} type="button">
+      <button onClick={listenForPublicKey} type="button">
         Listen for a temporary encrypt chat
       </button>
       {listening ? <p>Listening to RSA public keys</p> : null}
       <button
-        onClick={SendPublicKeyAndStartChat}
+        onClick={sendPublicKeyAndStartChat}
         value="Start a temporary encrypt chat"
         type="button"
       >
