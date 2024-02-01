@@ -8,12 +8,17 @@ import WeChatChatPage from './Pages/WeChatChatPage';
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<MainLayout />} />
-        <Route path="/WeChatOperation" element={<WeChatOperation />} />
-        <Route path="/WeChatOperation/ChatPage" element={<WeChatChatPage />} />
-        <Route path="*" element={<MainLayout />} />
-      </Routes>
+      <div className="bg-gray-800 text-white min-h-screen">
+        <Routes>
+          <Route path="/" element={<MainLayout />} />
+          <Route path="/WeChatOperation" element={<WeChatOperation />} />
+          <Route
+            path="/WeChatOperation/ChatPage"
+            element={<WeChatChatPage />}
+          />
+          <Route path="*" element={<MainLayout />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

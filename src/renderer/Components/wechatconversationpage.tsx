@@ -114,25 +114,32 @@ export default function WeChatConversationPage() {
   }
 
   return (
-    <div>
-      <h1>Chat Page</h1>
-      <div>
+    <div className="min-h-screen bg-gray-800 text-white p-6">
+      <h1 className="text-2xl font-bold mb-4">Chat Page</h1>
+      <div className="bg-gray-700 p-4 rounded-lg shadow-lg overflow-y-auto h-96 mb-4">
         {/* Display messages */}
         {decryptedMessages.map((msg: Message) => (
-          <p key={msg.msgId}>
-            <strong>{msg.fromUser}:</strong> {msg.content}
+          <p key={msg.msgId} className="border-b border-gray-600 mb-2 pb-2">
+            <strong className="text-blue-400">{msg.fromUser}:</strong>{' '}
+            {msg.content}
           </p>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           type="text"
           value={messageToSend}
           onChange={handleInputChange}
           placeholder="Type a message..."
+          className="flex-1 bg-gray-600 rounded-lg p-2 text-white outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button type="submit">Send</button>
+        <button
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Send
+        </button>
       </form>
     </div>
   );

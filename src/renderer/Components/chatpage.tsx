@@ -73,20 +73,18 @@ export default function ChatPage({ contact }: ChatPageProps) {
     }
   };
   return (
-    <div>
+    <div className="bg-gray-800 text-white p-4 rounded-lg shadow-lg">
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-4">
-          Contact: {contact.name}
-        </p>
+        <p className="text-sm font-semibold mb-4">Contact: {contact.name}</p>
         <button
           type="button"
-          className="p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0"
+          className="p-2 w-full text-left hover:bg-blue-500 hover:text-white rounded-md mb-2 last:mb-0"
         >
           Add secret key
         </button>
         <button
           type="button"
-          className="p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0"
+          className="p-2 w-full text-left hover:bg-blue-500 hover:text-white rounded-md mb-2 last:mb-0"
         >
           Show his public key
         </button>
@@ -94,7 +92,7 @@ export default function ChatPage({ contact }: ChatPageProps) {
       <textarea
         value={message}
         onChange={handleTextareaChange}
-        className="p-2 w-full border rounded-md mb-2"
+        className="p-2 w-full bg-gray-700 border border-gray-600 rounded-md mb-2 text-white"
         placeholder="Enter your message here"
         style={{ minHeight: '100px' }}
       />
@@ -106,15 +104,15 @@ export default function ChatPage({ contact }: ChatPageProps) {
           checked={isEncrypted}
           onChange={() => setIsEncrypted(!isEncrypted)}
         />
-        <div className="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-green-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
-        <span className="ms-3 text-sm font-medium text-gray-400 dark:text-gray-500">
+        <div className="w-11 h-6 bg-gray-200 rounded-full dark:bg-gray-600 peer-checked:bg-blue-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all" />
+        <span className="ml-3 text-sm font-medium">
           {isEncrypted ? 'Decrypt' : 'Encrypt'}
         </span>
       </label>
 
       <button
         type="button"
-        className="p-2 w-full text-left hover:bg-blue-100 rounded-md mb-2 last:mb-0"
+        className="p-2 w-full text-left hover:bg-blue-500 hover:text-white rounded-md"
         onClick={encryptDecryptMessage}
       >
         {isEncrypted ? 'Decrypt Message' : 'Encrypt Message'}
