@@ -11,6 +11,7 @@ export interface IElectronAPI {
   checkWechatLogin: () => Promise<any>;
   hookWechat: (hookSettings: any) => Promise<any>;
   receiveMessage: (callback: any) => Promise<any>;
+  sendMessage: (message: any) => Promise<any>;
 }
 
 declare global {

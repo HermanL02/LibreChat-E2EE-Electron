@@ -78,6 +78,10 @@ ipcMain.handle('check-wechat-login', async () => {
 ipcMain.handle('hook-wechat', async (event, hookSettings) => {
   return HookDirect.hookMessage(hookSettings);
 });
+ipcMain.handle('send-msg-hook', async (event, sendMsgHookSettings) => {
+  console.log(sendMsgHookSettings);
+  return HookDirect.sendMsg(sendMsgHookSettings);
+});
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
