@@ -13,12 +13,13 @@ interface HookSettings {
   timeout: string;
   enableHttp: boolean;
 }
-// 定义针对hook消息的响应接口
+
 interface HookResponse {
   code: number;
   msg: string;
   data: any;
 }
+
 interface SendMsgHookSettings {
   wxid: string;
   msg: string;
@@ -29,6 +30,7 @@ interface SendMsgHookResponse {
   msg: string;
   data: object | null;
 }
+
 export default class HookDirect {
   static checkLogin = async () => {
     try {
@@ -57,14 +59,13 @@ export default class HookDirect {
         timeout: hookSettings.timeout,
         enableHttp: hookSettings.enableHttp,
       };
-      console.log(requestBody);
-      // 发送POST请求
+      // Send POST request
       const response: AxiosResponse<HookResponse> = await axios.post(
         'http://0.0.0.0:19088/api/hookSyncMsg', // hook的API地址
         requestBody,
       );
 
-      // 检查响应
+      // Check Response
       if (response && response.data) {
         return response.data;
       }
@@ -78,14 +79,11 @@ export default class HookDirect {
     messageinfo: SendMsgHookSettings,
   ): Promise<SendMsgHookResponse | { error: string }> => {
     try {
-      console.log(messageinfo);
       // 构造请求的body
       const requestBody = {
         wxid: messageinfo.wxid,
         msg: messageinfo.msg,
       };
-      console.log(requestBody);
-
       // 发送POST请求
       const response: AxiosResponse<SendMsgHookResponse> = await axios.post(
         'http://0.0.0.0:19088/api/sendTextMsg',
