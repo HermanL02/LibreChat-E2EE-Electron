@@ -19,7 +19,7 @@ type Message = {
 export default function WeChatConversationPage() {
   const location = useLocation();
   const info = location.state?.info as Message | undefined;
-  const { messages } = useWeChatMessages();
+  const { messages, addMessage } = useWeChatMessages();
   const [decryptedMessages, setDecryptedMessages] = useState([]);
   const messagesEndRef = useRef(null);
   const { latestPersonalKey } = usePersonalKeys();
@@ -38,8 +38,11 @@ export default function WeChatConversationPage() {
 
   useEffect(() => {
     const filterAndDecryptMessages = async () => {
+      console.log(info.fromUser);
       const filteredMessages = messages.filter(
-        (message) => message.fromUser === info?.fromUser,
+        (message) =>
+          message.fromUser === info.fromUser ||
+          message.toUser === info.fromUser,
       );
       const decrypted = await Promise.all(
         filteredMessages.map(async (message) => {
@@ -51,10 +54,11 @@ export default function WeChatConversationPage() {
             return { ...message, content: decryptedContent };
           } catch (error) {
             console.log('Decryption failed', error);
-            return { ...message, content: '[Failed to decrypt]' };
+            return { ...message, content: message.content };
           }
         }),
       );
+      console.log('decrypted', decryptedMessages);
       setDecryptedMessages(decrypted);
     };
 
@@ -80,11 +84,9 @@ export default function WeChatConversationPage() {
     return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
   }
 
-  const handleSendMessage = async (message) => {
+  const handleSendMessage = async (message: any) => {
     try {
       const latestPublicKey = formatPublicKey(info.content);
-      console.log(latestPublicKey);
-      console.log(latestPersonalKey.publicKey);
       if (latestPublicKey) {
         const encryptedMessage = await window.electronAPI.encrypt(
           message,
@@ -95,6 +97,19 @@ export default function WeChatConversationPage() {
           wxid: info.fromUser,
           msg: encryptedMessage,
         });
+        console.log('sending');
+        addMessage({
+          msgId: response.msgId,
+          fromUser: 'me',
+          content: message,
+          createTime: Date.now(),
+          displayFullContent: message,
+          msgSequence: Math.random(),
+          pid: 1,
+          signature: '',
+          toUser: info.fromUser,
+          type: 1,
+        });
       } else {
         console.error('No public key available');
       }
@@ -102,6 +117,7 @@ export default function WeChatConversationPage() {
       console.error('Encryption failed', error);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (messageToSend.trim()) {

@@ -22,6 +22,7 @@ interface WeChatMessageContextType {
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   listenForPublicKey: () => void;
   sendPublicKeyAndStartChat: () => void;
+  addMessage: (message: Message) => void;
 }
 
 const WeChatMessageContext = createContext<
@@ -54,6 +55,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
             navigate('/WeChatOperation/ChatPage', {
               state: { info: message },
             });
+            setListening(false);
           }
         }
       }
@@ -79,7 +81,11 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
   const sendPublicKeyAndStartChat = () => {
     setListening(false);
   };
-
+  const addMessage = (message: Message) => {
+    console.log('adding Message');
+    setMessages((prevMessages) => [...prevMessages, message]);
+    console.log(messages);
+  };
   return (
     <WeChatMessageContext.Provider
       value={{
@@ -88,6 +94,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
         setMessages,
         listenForPublicKey,
         sendPublicKeyAndStartChat,
+        addMessage,
       }}
     >
       {children}

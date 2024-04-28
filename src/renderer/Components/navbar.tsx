@@ -9,17 +9,18 @@ function Navbar() {
       <button
         type="button"
         className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-        onClick={() => navigate('/normal-contacts')}
+        onClick={() => navigate('/')}
       >
         Normal Contacts
       </button>
-      <button
+      {/* <button
+        disabled
         type="button"
         className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-300"
         onClick={() => navigate('/sharing-contacts')}
       >
-        Sharing Contacts with UID
-      </button>
+        Sync Contacts (Not Done)
+      </button> */}
       <button
         type="button"
         className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition duration-300"

@@ -73,7 +73,8 @@ ipcMain.handle('decrypt', async (event, text, privateKey) => {
   return Encryptor.decrypt(text, privateKey);
 });
 ipcMain.handle('check-wechat-login', async () => {
-  return HookDirect.checkLogin();
+  const returndata = await HookDirect.checkLogin();
+  return returndata;
 });
 ipcMain.handle('hook-wechat', async (event, hookSettings) => {
   return HookDirect.hookMessage(hookSettings);

@@ -48,14 +48,7 @@ export default function WeChatConnection({
             <div>
               <label className="block text-sm font-bold mb-2">
                 <input type="checkbox" className="mr-2" />
-                Open WeChat with Run as Administrator and Login; Open CMD with
-                Run as Administrator
-              </label>
-              <label className="block text-sm font-bold mb-2">
-                <input type="checkbox" className="mr-2" />
-                Use CMD to direct to Injector.exe; run the command line below,
-                substitute the path of dll file with your own path: Injector.exe
-                --process-name WeChat.exe -i D:\wxhelper3982501.dll
+                Run WeChat as Administrator and Login
               </label>
             </div>
           </div>

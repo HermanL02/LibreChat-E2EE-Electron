@@ -1,4 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
+import * as sudo from 'sudo-prompt';
+import * as path from 'path';
+import { getInjectorPath } from '../util';
 
 interface LoginResponse {
   code: number;
@@ -32,8 +35,59 @@ interface SendMsgHookResponse {
 }
 
 export default class HookDirect {
+  static injectWeChat = async () => {
+    const options = {
+      name: 'Libre Chat WeChat',
+    };
+    const injectorPath = getInjectorPath();
+    const inject1 = path.join(injectorPath, 'Injector32.exe');
+    const inject2 = path.join(injectorPath, 'Injectorx64.exe');
+    const inject3 = path.join(injectorPath, 'Injectora64.exe');
+    const dllpath = path.join(injectorPath, 'wxhelper39825.dll');
+
+    const commands = [
+      `${inject1} --process-name WeChat.exe -i ${dllpath}`,
+      `${inject2} --process-name WeChat.exe -i ${dllpath}`,
+      `${inject3} --process-name WeChat.exe -i ${dllpath}`,
+    ];
+
+    async function executeCommands(index: number): Promise<void> {
+      // eslint-disable-next-line no-async-promise-executor
+      return new Promise(async (resolve, reject) => {
+        if (index >= commands.length) {
+          resolve();
+          return;
+        }
+        const command = commands[index];
+        sudo.exec(command, options, (error, stdout, stderr) => {
+          console.log(`Executing command ${index + 1}: ${command}`);
+          if (stdout) {
+            console.log(`stdout: ${stdout}`);
+            resolve();
+            return;
+          }
+          if (stderr) {
+            console.error(`stderr: ${stderr}`);
+          }
+          if (error) {
+            console.error(`Error: ${error}`);
+            executeCommands(index + 1)
+              .then(resolve)
+              .catch(reject);
+          } else {
+            executeCommands(index + 1)
+              .then(resolve)
+              .catch(reject);
+          }
+        });
+      });
+    }
+    await executeCommands(0);
+  };
+
   static checkLogin = async () => {
     try {
+      await this.injectWeChat();
       const response: AxiosResponse<LoginResponse> = await axios.post(
         'http://0.0.0.0:19088/api/checkLogin',
       );
@@ -43,6 +97,7 @@ export default class HookDirect {
       }
       throw new Error('No response from API');
     } catch (error: any) {
+      console.log('Error Connection');
       return { error: 'Error connecting to API' };
     }
   };
