@@ -20,8 +20,8 @@ export default function WeChatConversationPage() {
   const location = useLocation();
   const info = location.state?.info as Message | undefined;
   const { messages, addMessage } = useWeChatMessages();
-  const [decryptedMessages, setDecryptedMessages] = useState([]);
-  const messagesEndRef = useRef(null);
+  const [decryptedMessages, setDecryptedMessages] = useState<Message[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { latestPersonalKey } = usePersonalKeys();
   const scrollToBottom = () => {
     messagesEndRef?.current?.scrollIntoView({ behavior: 'smooth' });
@@ -90,7 +90,7 @@ export default function WeChatConversationPage() {
   };
   const handleSendMessage = async (message: any) => {
     try {
-      const latestPublicKey = formatPublicKey(info?.content);
+      const latestPublicKey = formatPublicKey(info?.content || '');
       if (latestPublicKey) {
         const encryptedMessage = await window.electronAPI.encrypt(
           message,
@@ -98,7 +98,7 @@ export default function WeChatConversationPage() {
         );
 
         const response = await window.electronAPI.sendMessage({
-          wxid: info.fromUser,
+          wxid: info?.fromUser,
           msg: encryptedMessage,
         });
         console.log('sending');
@@ -111,7 +111,7 @@ export default function WeChatConversationPage() {
           msgSequence: Math.random(),
           pid: 1,
           signature: '',
-          toUser: info.fromUser,
+          toUser: info?.fromUser || '',
           type: 1,
         });
       } else {
@@ -122,7 +122,7 @@ export default function WeChatConversationPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (messageToSend.trim()) {
       await handleSendMessage(messageToSend);

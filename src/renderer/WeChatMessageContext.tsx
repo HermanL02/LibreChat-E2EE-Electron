@@ -53,6 +53,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
         try {
           const content = JSON.parse(message.content);
           const { publicKey, userName } = content;
+          console.log('Username', userName);
 
           if (publicKey) {
             // In case the message is sent by myself

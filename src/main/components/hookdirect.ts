@@ -15,6 +15,7 @@ interface HookSettings {
   url: string;
   timeout: string;
   enableHttp: boolean;
+  hookOrUnhook: boolean;
 }
 
 interface HookResponse {
@@ -105,28 +106,44 @@ export default class HookDirect {
   static hookMessage = async (
     hookSettings: HookSettings,
   ): Promise<HookResponse | { error: string }> => {
-    try {
-      // Construct Request Body
-      const requestBody = {
-        port: hookSettings.port,
-        ip: hookSettings.ip,
-        url: hookSettings.url,
-        timeout: hookSettings.timeout,
-        enableHttp: hookSettings.enableHttp,
-      };
-      // Send POST request
-      const response: AxiosResponse<HookResponse> = await axios.post(
-        'http://0.0.0.0:19088/api/?type=9', // Hook API Address
-        requestBody,
-      );
+    if (hookSettings.hookOrUnhook) {
+      try {
+        // Construct Request Body
+        const requestBody = {
+          port: hookSettings.port,
+          ip: hookSettings.ip,
+          url: hookSettings.url,
+          timeout: hookSettings.timeout,
+          enableHttp: hookSettings.enableHttp,
+        };
+        // Send POST request
+        const response: AxiosResponse<HookResponse> = await axios.post(
+          'http://0.0.0.0:19088/api/?type=9', // Hook API Address
+          requestBody,
+        );
 
-      // Check Response
-      if (response && response.data) {
-        return response.data;
+        // Check Response
+        if (response && response.data) {
+          return response.data;
+        }
+        throw new Error('No response from API');
+      } catch (error: any) {
+        return { error: error.message || 'Error connecting to API' };
       }
-      throw new Error('No response from API');
-    } catch (error: any) {
-      return { error: error.message || 'Error connecting to API' };
+    } else {
+      try {
+        const requestBody = {};
+        const response: AxiosResponse<HookResponse> = await axios.post(
+          'http://0.0.0.0:19088/api/?type=10', // Hook API Address
+          requestBody,
+        );
+        if (response && response.data) {
+          return response.data;
+        }
+        throw new Error('No response from API');
+      } catch (error: any) {
+        return { error: error.message || 'Error connecting to API' };
+      }
     }
   };
 

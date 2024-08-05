@@ -29,6 +29,7 @@ export default function WeChatHook() {
   const url = `http://localhost:${sharedPortUse}`;
   const hookWechat = async () => {
     const hooksettings = {
+      hookOrUnhook: true,
       port: '19099',
       ip: '0.0.0.0',
       url,
@@ -37,7 +38,7 @@ export default function WeChatHook() {
     };
     const response = await window.electronAPI.hookWechat(hooksettings);
     if (response) {
-      if (response.code === 0) {
+      if (response.code === 1) {
         window.electron.ipcRenderer.sendMessage('show-dialog', {
           title: 'WeChat Hook',
           buttons: ['OK'],
@@ -51,6 +52,7 @@ export default function WeChatHook() {
           type: 'info',
           message: `Please Unhook First!${response}`,
         });
+        console.log(response);
       }
     } else {
       window.electron.ipcRenderer.sendMessage('show-dialog', {
@@ -64,6 +66,7 @@ export default function WeChatHook() {
 
   const unhookWechat = async () => {
     const hooksettings = {
+      hookOrUnhook: false,
       port: '19099',
       ip: '0.0.0.0',
       url,
@@ -72,7 +75,7 @@ export default function WeChatHook() {
     };
     const response = await window.electronAPI.hookWechat(hooksettings);
     if (response) {
-      if (response.code === 0) {
+      if (response.code === 1) {
         window.electron.ipcRenderer.sendMessage('show-dialog', {
           title: 'WeChat Hook',
           buttons: ['OK'],
@@ -86,6 +89,7 @@ export default function WeChatHook() {
           type: 'info',
           message: `Please Unhook First!${response}`,
         });
+        console.log(response);
       }
     } else {
       window.electron.ipcRenderer.sendMessage('show-dialog', {
