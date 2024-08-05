@@ -10,7 +10,7 @@ import FunctionList from '../Components/functionlist';
 import AddFriendPage from '../Components/addfriend';
 import PersonalInfo from '../Components/personalinfo';
 import Navbar from '../Components/navbar';
-// 定义 ContactList 的 Props 类型
+// Define Contact List's Prop Types
 
 function ContentArea() {
   const { selectedContact, currentPage, getAllFriends } = useAppState();

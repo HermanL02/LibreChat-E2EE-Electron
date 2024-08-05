@@ -50,16 +50,24 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
     window.electronAPI.receiveMessage((message: Message) => {
       console.log('Message from main process:', message);
       if (listening) {
-        if (message.content.includes('RSA')) {
-          if (message.fromUser !== '') {
-            navigate('/WeChatOperation/ChatPage', {
-              state: { info: message },
-            });
-            setListening(false);
+        try {
+          const content = JSON.parse(message.content);
+          const { publicKey, userName } = content;
+
+          if (publicKey) {
+            // In case the message is sent by myself
+            if (message.fromUser !== '') {
+              navigate('/WeChatOperation/ChatPage', {
+                state: { info: message },
+              });
+              setListening(false);
+            }
           }
+        } catch (error) {
+          console.error('Invalid JSON content:', error);
         }
       }
-      // 直接将接收到的消息对象添加到 messages 数组中
+      // Add Messages Direct to the Array
       setMessages((prevMessages) => {
         if (
           prevMessages.some(
@@ -67,9 +75,9 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
           )
         ) {
           console.warn(`Duplicate message id detected: ${message.msgId}`);
-          return prevMessages; // 如果存在，不添加重复的消息
+          return prevMessages; // (If Exist, No Repetative Msg.)
         }
-        return [...prevMessages, message]; // 如果不存在，添加新消息
+        return [...prevMessages, message]; // If Not Exist, add new msg.
       });
     });
   }, [navigate, listening]);

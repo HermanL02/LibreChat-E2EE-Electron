@@ -31,7 +31,7 @@ const server: Server = newExpressServer.listen(globalAny.sharedPort, () => {
 server.on('error', (error: any) => {
   if (error.code === 'EADDRINUSE') {
     console.error(`Port ${globalAny.sharedPort} is already in use.`);
-    // 尝试另一个端口
+    // Attempt Another Port
     server.close();
     globalAny.sharedPort += 1;
     server.listen(globalAny.sharedPort);

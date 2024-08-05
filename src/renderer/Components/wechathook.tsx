@@ -21,7 +21,7 @@ export default function WeChatHook() {
   window.electron.ipcRenderer.on(
     'response-shared-port',
     (event, sharedPort: any) => {
-      console.log(sharedPort); // 应该输出 3000
+      console.log(sharedPort); // Should output 3000
       sharedPortUse = sharedPort;
     },
   );
@@ -49,7 +49,42 @@ export default function WeChatHook() {
           title: 'WeChat Hook',
           buttons: ['OK'],
           type: 'info',
-          message: 'Please Unhook First!',
+          message: `Please Unhook First!${response}`,
+        });
+      }
+    } else {
+      window.electron.ipcRenderer.sendMessage('show-dialog', {
+        title: 'WeChat Hook',
+        buttons: ['OK'],
+        type: 'info',
+        message: 'WeChat Hook failed! It is our problem, not yours.',
+      });
+    }
+  };
+
+  const unhookWechat = async () => {
+    const hooksettings = {
+      port: '19099',
+      ip: '0.0.0.0',
+      url,
+      timeout: '3000',
+      enableHttp: true,
+    };
+    const response = await window.electronAPI.hookWechat(hooksettings);
+    if (response) {
+      if (response.code === 0) {
+        window.electron.ipcRenderer.sendMessage('show-dialog', {
+          title: 'WeChat Hook',
+          buttons: ['OK'],
+          type: 'info',
+          message: 'WeChat Hook successfully!',
+        });
+      } else {
+        window.electron.ipcRenderer.sendMessage('show-dialog', {
+          title: 'WeChat Hook',
+          buttons: ['OK'],
+          type: 'info',
+          message: `Please Unhook First!${response}`,
         });
       }
     } else {
@@ -74,6 +109,7 @@ export default function WeChatHook() {
         <button
           type="button"
           className="btn-red bg-gradient-to-r from-red-500 to-red-700 hover:from-red-700 hover:to-red-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out"
+          onClick={unhookWechat}
         >
           Unhook
         </button>

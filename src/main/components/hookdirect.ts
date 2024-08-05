@@ -41,14 +41,14 @@ export default class HookDirect {
     };
     const injectorPath = getInjectorPath();
     const inject1 = path.join(injectorPath, 'Injector32.exe');
-    const inject2 = path.join(injectorPath, 'Injectorx64.exe');
-    const inject3 = path.join(injectorPath, 'Injectora64.exe');
-    const dllpath = path.join(injectorPath, 'wxhelper39825.dll');
+    // const inject2 = path.join(injectorPath, 'Injectorx64.exe');
+    // const inject3 = path.join(injectorPath, 'Injectora64.exe');
+    const dllpath = path.join(injectorPath, 'wxhelper39223.dll');
 
     const commands = [
       `${inject1} --process-name WeChat.exe -i ${dllpath}`,
-      `${inject2} --process-name WeChat.exe -i ${dllpath}`,
-      `${inject3} --process-name WeChat.exe -i ${dllpath}`,
+      // `${inject2} --process-name WeChat.exe -i ${dllpath}`,
+      // `${inject3} --process-name WeChat.exe -i ${dllpath}`,
     ];
 
     async function executeCommands(index: number): Promise<void> {
@@ -89,7 +89,7 @@ export default class HookDirect {
     try {
       await this.injectWeChat();
       const response: AxiosResponse<LoginResponse> = await axios.post(
-        'http://0.0.0.0:19088/api/checkLogin',
+        'http://0.0.0.0:19088/api/?type=0',
       );
 
       if (response && response.data) {
@@ -106,7 +106,7 @@ export default class HookDirect {
     hookSettings: HookSettings,
   ): Promise<HookResponse | { error: string }> => {
     try {
-      // 构造hook请求的body
+      // Construct Request Body
       const requestBody = {
         port: hookSettings.port,
         ip: hookSettings.ip,
@@ -116,7 +116,7 @@ export default class HookDirect {
       };
       // Send POST request
       const response: AxiosResponse<HookResponse> = await axios.post(
-        'http://0.0.0.0:19088/api/hookSyncMsg', // hook的API地址
+        'http://0.0.0.0:19088/api/?type=9', // Hook API Address
         requestBody,
       );
 
@@ -134,18 +134,18 @@ export default class HookDirect {
     messageinfo: SendMsgHookSettings,
   ): Promise<SendMsgHookResponse | { error: string }> => {
     try {
-      // 构造请求的body
+      // Construct Body
       const requestBody = {
         wxid: messageinfo.wxid,
         msg: messageinfo.msg,
       };
-      // 发送POST请求
+
       const response: AxiosResponse<SendMsgHookResponse> = await axios.post(
-        'http://0.0.0.0:19088/api/sendTextMsg',
+        'http://0.0.0.0:19088/api/?type=2',
         requestBody,
       );
 
-      // 检查响应
+      // Check Response
       if (response && response.data) {
         return response.data;
       }

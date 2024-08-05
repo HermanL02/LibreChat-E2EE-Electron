@@ -18,7 +18,7 @@ export default function WeChatConnection({
         title: 'WeChat Login',
         buttons: ['OK'],
         type: 'info',
-        message: 'WeChat Login successfully!',
+        message: 'WeChat Connected! ',
       });
       setIsConnected(true);
     } else {
@@ -26,7 +26,7 @@ export default function WeChatConnection({
         title: 'WeChat Login',
         buttons: ['OK'],
         type: 'info',
-        message: 'WeChat Login failed!',
+        message: 'Please Start WeChat with Admin Priviledge! ',
       });
     }
   };

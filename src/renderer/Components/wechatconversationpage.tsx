@@ -24,11 +24,11 @@ export default function WeChatConversationPage() {
   const messagesEndRef = useRef(null);
   const { latestPersonalKey } = usePersonalKeys();
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef?.current?.scrollIntoView({ behavior: 'smooth' });
   };
   const [messageToSend, setMessageToSend] = useState('');
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: any) => {
     setMessageToSend(e.target.value);
   };
 
@@ -38,11 +38,11 @@ export default function WeChatConversationPage() {
 
   useEffect(() => {
     const filterAndDecryptMessages = async () => {
-      console.log(info.fromUser);
+      console.log(info?.fromUser);
       const filteredMessages = messages.filter(
         (message) =>
-          message.fromUser === info.fromUser ||
-          message.toUser === info.fromUser,
+          message.fromUser === info?.fromUser ||
+          message.toUser === info?.fromUser,
       );
       const decrypted = await Promise.all(
         filteredMessages.map(async (message) => {
@@ -63,7 +63,7 @@ export default function WeChatConversationPage() {
     };
 
     filterAndDecryptMessages();
-  }, [messages, info, latestPersonalKey.privateKey]);
+  }, [messages, info, latestPersonalKey.privateKey, decryptedMessages]);
   function formatPublicKey(key: string) {
     const PEM_HEADER = '-----BEGIN RSA PUBLIC KEY-----';
     const PEM_FOOTER = '-----END RSA PUBLIC KEY-----';
@@ -83,10 +83,14 @@ export default function WeChatConversationPage() {
 
     return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
   }
-
+  const handleChangeTextToPubKey = async () => {
+    const response = await window.electronAPI.getPersonalKeys();
+    console.log('Change Text Field');
+    handleInputChange(response);
+  };
   const handleSendMessage = async (message: any) => {
     try {
-      const latestPublicKey = formatPublicKey(info.content);
+      const latestPublicKey = formatPublicKey(info?.content);
       if (latestPublicKey) {
         const encryptedMessage = await window.electronAPI.encrypt(
           message,
@@ -155,6 +159,14 @@ export default function WeChatConversationPage() {
           className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
         >
           Send
+        </button>
+      </form>
+      <form onSubmit={handleChangeTextToPubKey} className="flex gap-2">
+        <button
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Send My Key
         </button>
       </form>
     </div>
