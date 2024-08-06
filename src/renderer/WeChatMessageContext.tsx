@@ -88,6 +88,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const sendPublicKeyAndStartChat = () => {
+    navigate('/WeChatOperation/WeChatContact');
     setListening(false);
   };
   const addMessage = (message: Message) => {

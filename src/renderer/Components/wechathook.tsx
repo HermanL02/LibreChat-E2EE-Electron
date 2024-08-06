@@ -2,18 +2,6 @@ import 'tailwindcss/tailwind.css';
 import React from 'react';
 import { useWeChatMessages } from '../WeChatMessageContext';
 
-// type Message = {
-//   content: string;
-//   createTime: number;
-//   displayFullContent: string;
-//   fromUser: string;
-//   msgId: number;
-//   msgSequence: number;
-//   pid: number;
-//   signature: string;
-//   toUser: string;
-//   type: number;
-// };
 export default function WeChatHook() {
   const { messages, listening, listenForPublicKey, sendPublicKeyAndStartChat } =
     useWeChatMessages();
@@ -30,7 +18,7 @@ export default function WeChatHook() {
   const hookWechat = async () => {
     const hooksettings = {
       hookOrUnhook: true,
-      port: '19099',
+      port: '3000',
       ip: '0.0.0.0',
       url,
       timeout: '3000',
@@ -67,7 +55,7 @@ export default function WeChatHook() {
   const unhookWechat = async () => {
     const hooksettings = {
       hookOrUnhook: false,
-      port: '19099',
+      port: '3000',
       ip: '0.0.0.0',
       url,
       timeout: '3000',
@@ -80,14 +68,14 @@ export default function WeChatHook() {
           title: 'WeChat Hook',
           buttons: ['OK'],
           type: 'info',
-          message: 'WeChat Hook successfully!',
+          message: 'WeChat Unhooked!',
         });
       } else {
         window.electron.ipcRenderer.sendMessage('show-dialog', {
           title: 'WeChat Hook',
           buttons: ['OK'],
           type: 'info',
-          message: `Please Unhook First!${response}`,
+          message: `WeChat is not Hooked!`,
         });
         console.log(response);
       }
@@ -96,7 +84,7 @@ export default function WeChatHook() {
         title: 'WeChat Hook',
         buttons: ['OK'],
         type: 'info',
-        message: 'WeChat Hook failed! It is our problem, not yours.',
+        message: 'WeChat Unhook Failed!',
       });
     }
   };

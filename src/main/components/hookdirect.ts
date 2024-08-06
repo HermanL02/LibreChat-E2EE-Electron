@@ -35,6 +35,20 @@ interface SendMsgHookResponse {
   data: object | null;
 }
 
+interface Contact {
+  customAccount: string;
+  delFlag: number;
+  type: number;
+  userName: string;
+  verifyFlag: number;
+  wxid: string;
+}
+
+interface ContactResponse {
+  code: number;
+  data: Contact[];
+}
+
 export default class HookDirect {
   static injectWeChat = async () => {
     const options = {
@@ -159,6 +173,28 @@ export default class HookDirect {
 
       const response: AxiosResponse<SendMsgHookResponse> = await axios.post(
         'http://0.0.0.0:19088/api/?type=2',
+        requestBody,
+      );
+
+      // Check Response
+      if (response && response.data) {
+        return response.data;
+      }
+      throw new Error('No response from API');
+    } catch (error: any) {
+      return { error: error.message || 'Error connecting to API' };
+    }
+  };
+
+  static getContactList = async (): Promise<
+    ContactResponse | { error: string }
+  > => {
+    try {
+      // Construct Body
+      const requestBody = {};
+
+      const response: AxiosResponse<ContactResponse> = await axios.post(
+        'http://0.0.0.0:19088/api/?type=46',
         requestBody,
       );
 

@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getPersonalKeys: () => ipcRenderer.invoke('get-personal-keys'),
   checkWechatLogin: () => ipcRenderer.invoke('check-wechat-login'),
   sendMessage: (message: any) => ipcRenderer.invoke('send-msg-hook', message),
+  getContact: () => ipcRenderer.invoke('get-contact'),
   hookWechat: (hookSettings: any) =>
     ipcRenderer.invoke('hook-wechat', hookSettings),
   receiveMessage: (callback: any) =>

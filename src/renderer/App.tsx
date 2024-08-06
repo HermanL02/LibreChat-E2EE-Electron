@@ -2,8 +2,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './Pages/MainLayout';
-import WeChatOperation from './Pages/WeChatOperation'; // Import your other page component
+import WeChatOperation from './Pages/WeChatOperation';
 import WeChatChatPage from './Pages/WeChatChatPage';
+import WeChatContact from './Pages/WeChatContact';
 
 function App() {
   return (
@@ -16,6 +17,11 @@ function App() {
             path="/WeChatOperation/ChatPage"
             element={<WeChatChatPage />}
           />
+          <Route
+            path="/WeChatOperation/WeChatContact"
+            element={<WeChatContact />}
+          />
+
           <Route path="*" element={<MainLayout />} />
         </Routes>
       </div>

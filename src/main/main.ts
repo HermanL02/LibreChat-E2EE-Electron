@@ -83,6 +83,9 @@ ipcMain.handle('send-msg-hook', async (event, sendMsgHookSettings) => {
   console.log(sendMsgHookSettings);
   return HookDirect.sendMsg(sendMsgHookSettings);
 });
+ipcMain.handle('get-contact', async () => {
+  return HookDirect.getContactList();
+});
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
