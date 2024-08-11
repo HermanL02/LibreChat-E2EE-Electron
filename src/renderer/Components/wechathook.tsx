@@ -1,10 +1,14 @@
 import 'tailwindcss/tailwind.css';
-import React from 'react';
-import { useWeChatMessages } from '../WeChatMessageContext';
+import React, { useState } from 'react';
+import WeChatContact from './WeChatContact';
+import {
+  useWeChatMessages,
+  WeChatMessageProvider,
+} from '../WeChatMessageContext';
 
 export default function WeChatHook() {
-  const { messages, listening, listenForPublicKey, sendPublicKeyAndStartChat } =
-    useWeChatMessages();
+  const { messages, listening, listenForPublicKey } = useWeChatMessages();
+  const [isContactListOpen, setContactListOpen] = useState(false);
   let sharedPortUse = 3000;
   window.electron.ipcRenderer.on(
     'response-shared-port',
@@ -89,67 +93,72 @@ export default function WeChatHook() {
     }
   };
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between mb-4">
+    <WeChatMessageProvider>
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between mb-4">
+          <button
+            type="button"
+            className="btn-blue bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out"
+            onClick={hookWechat}
+          >
+            Hook
+          </button>
+          <button
+            type="button"
+            className="btn-red bg-gradient-to-r from-red-500 to-red-700 hover:from-red-700 hover:to-red-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out"
+            onClick={unhookWechat}
+          >
+            Unhook
+          </button>
+        </div>
         <button
+          onClick={() => listenForPublicKey(true)}
           type="button"
-          className="btn-blue bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-700 hover:to-blue-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out"
-          onClick={hookWechat}
+          className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-700 hover:to-green-500 text-white font-bold py-2 px-4 rounded shadow-lg mb-4 transform hover:scale-110 transition duration-300 ease-in-out"
         >
-          Hook
+          Listen for a temporary encrypt chat
         </button>
-        <button
-          type="button"
-          className="btn-red bg-gradient-to-r from-red-500 to-red-700 hover:from-red-700 hover:to-red-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out"
-          onClick={unhookWechat}
-        >
-          Unhook
-        </button>
-      </div>
-      <button
-        onClick={listenForPublicKey}
-        type="button"
-        className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-700 hover:to-green-500 text-white font-bold py-2 px-4 rounded shadow-lg mb-4 transform hover:scale-110 transition duration-300 ease-in-out"
-      >
-        Listen for a temporary encrypt chat
-      </button>
-      <div>
-        {listening ? (
-          <div className="flex items-center">
-            <p className="text-gray-300 animate-pulse mr-3">
-              Listening to RSA public keys
-            </p>
-            <div className="space-x-1">
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-blue-400" />
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-red-400" />
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-green-400" />
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-yellow-400" />
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-purple-400" />
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-pink-400" />
-              <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-gray-400" />
+        <div>
+          {listening ? (
+            <div className="flex items-center">
+              <p className="text-gray-300 animate-pulse mr-3">
+                Listening to RSA public keys
+              </p>
+              <div className="space-x-1">
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-blue-400" />
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-red-400" />
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-green-400" />
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-yellow-400" />
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-purple-400" />
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-pink-400" />
+                <div className="inline-block h-8 w-8 animate-pulse rounded-full bg-gray-400" />
+              </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        <button
-          onClick={sendPublicKeyAndStartChat}
-          value="Start a temporary encrypt chat"
-          type="button"
-          className="bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-700 hover:to-purple-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out"
-        >
-          Start a temporary encrypt chat
-        </button>
-        <div className="bg-gray-700 p-4 my-4 h-64 overflow-y-auto shadow-inner rounded">
-          {messages.map((message) => (
-            <div
-              key={message.msgId}
-              className="mb-2 p-2 bg-gray-600 text-white rounded shadow-sm"
-            >
-              {message.content}
-            </div>
-          ))}
+          <button
+            onClick={() => setContactListOpen(!isContactListOpen)}
+            value="Start a temporary encrypt chat"
+            type="button"
+            className="bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-700 hover:to-purple-500 text-white font-bold py-2 px-4 rounded shadow-lg transform hover:scale-110 transition duration-300 ease-in-out mb-6"
+          >
+            Start a temporary encrypt chat
+          </button>
+
+          {isContactListOpen && <WeChatContact />}
+
+          <div className="bg-gray-700 p-4 my-4 h-64 overflow-y-auto shadow-inner rounded">
+            {messages.map((message) => (
+              <div
+                key={message.msgId}
+                className="mb-2 p-2 bg-gray-600 text-white rounded shadow-sm"
+              >
+                {message.content}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </WeChatMessageProvider>
   );
 }

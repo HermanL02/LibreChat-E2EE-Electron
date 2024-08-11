@@ -79,12 +79,21 @@ ipcMain.handle('check-wechat-login', async () => {
 ipcMain.handle('hook-wechat', async (event, hookSettings) => {
   return HookDirect.hookMessage(hookSettings);
 });
+ipcMain.handle('install-wechat', async () => {
+  return HookDirect.installWeChat();
+});
+ipcMain.handle('anti-wechat-upgrade', async () => {
+  return HookDirect.antiWeChatUpgrade();
+});
 ipcMain.handle('send-msg-hook', async (event, sendMsgHookSettings) => {
   console.log(sendMsgHookSettings);
   return HookDirect.sendMsg(sendMsgHookSettings);
 });
 ipcMain.handle('get-contact', async () => {
   return HookDirect.getContactList();
+});
+ipcMain.handle('get-logininfo', async () => {
+  return HookDirect.getLoginInfo();
 });
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;

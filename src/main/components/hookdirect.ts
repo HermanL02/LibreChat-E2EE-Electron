@@ -1,6 +1,8 @@
+/* eslint-disable promise/no-promise-in-callback */
 import axios, { AxiosResponse } from 'axios';
 import * as sudo from 'sudo-prompt';
 import * as path from 'path';
+import fs from 'fs';
 import { getInjectorPath } from '../util';
 
 interface LoginResponse {
@@ -28,7 +30,10 @@ interface SendMsgHookSettings {
   wxid: string;
   msg: string;
 }
-
+interface SendImageHookSettings {
+  wxid: string;
+  imagePath: string;
+}
 interface SendMsgHookResponse {
   code: number;
   msg: string;
@@ -48,8 +53,52 @@ interface ContactResponse {
   code: number;
   data: Contact[];
 }
-
+async function executeCommands(
+  index: number,
+  commands: string[],
+  options: { name: string },
+): Promise<void> {
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    if (index >= commands.length) {
+      resolve();
+      return;
+    }
+    const command = commands[index];
+    sudo.exec(command, options, (error, stdout, stderr) => {
+      console.log(`Executing command ${index + 1}: ${command}`);
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+        resolve();
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
+      if (error) {
+        console.error(`Error: ${error}`);
+        executeCommands(index + 1, commands, options)
+          .then(resolve)
+          .catch(reject);
+      } else {
+        executeCommands(index + 1, commands, options)
+          .then(resolve)
+          .catch(reject);
+      }
+    });
+  });
+}
 export default class HookDirect {
+  static installWeChat = async () => {
+    const options = {
+      name: 'Libre Chat WeChat',
+    };
+    const injectorPath = getInjectorPath();
+    const WeChatInstallCommand = path.join(injectorPath, 'WeChat39223.exe');
+    const commands = [WeChatInstallCommand];
+    await executeCommands(0, commands, options);
+  };
+
   static injectWeChat = async () => {
     const options = {
       name: 'Libre Chat WeChat',
@@ -66,38 +115,32 @@ export default class HookDirect {
       // `${inject3} --process-name WeChat.exe -i ${dllpath}`,
     ];
 
-    async function executeCommands(index: number): Promise<void> {
-      // eslint-disable-next-line no-async-promise-executor
-      return new Promise(async (resolve, reject) => {
-        if (index >= commands.length) {
-          resolve();
-          return;
-        }
-        const command = commands[index];
-        sudo.exec(command, options, (error, stdout, stderr) => {
-          console.log(`Executing command ${index + 1}: ${command}`);
-          if (stdout) {
-            console.log(`stdout: ${stdout}`);
-            resolve();
-            return;
-          }
-          if (stderr) {
-            console.error(`stderr: ${stderr}`);
-          }
-          if (error) {
-            console.error(`Error: ${error}`);
-            executeCommands(index + 1)
-              .then(resolve)
-              .catch(reject);
-          } else {
-            executeCommands(index + 1)
-              .then(resolve)
-              .catch(reject);
-          }
-        });
-      });
+    await executeCommands(0, commands, options);
+  };
+
+  static antiWeChatUpgrade = async () => {
+    const options = {
+      name: 'Libre Chat WeChat',
+    };
+    const injectorPath = getInjectorPath();
+    const antiUpgradeBatPath = path.join(injectorPath, 'antiUpgrade.bat');
+    const startupPath =
+      'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Startup';
+    const antiUpgradeDestinationPath = path.join(
+      startupPath,
+      'antiUpgrade.bat',
+    );
+    const commands = [
+      // `cmd /c "${antiUpgradeBatPath}"`,
+      `copy /Y "${antiUpgradeBatPath}" "${antiUpgradeDestinationPath}"`,
+      // `${inject2} --process-name WeChat.exe -i ${dllpath}`,
+      // `${inject3} --process-name WeChat.exe -i ${dllpath}`,
+    ];
+    if (!fs.existsSync(antiUpgradeDestinationPath)) {
+      await executeCommands(0, commands, options);
+      return { result: true };
     }
-    await executeCommands(0);
+    return { result: true };
   };
 
   static checkLogin = async () => {
@@ -117,9 +160,33 @@ export default class HookDirect {
     }
   };
 
-  static hookMessage = async (
-    hookSettings: HookSettings,
-  ): Promise<HookResponse | { error: string }> => {
+  static sendMsg = async (
+    messageinfo: SendMsgHookSettings,
+  ): Promise<SendMsgHookResponse | { error: string }> => {
+    try {
+      // Construct Body
+      const requestBody = {
+        wxid: messageinfo.wxid,
+        msg: messageinfo.msg.toString(),
+      };
+      console.log(requestBody);
+      const response: AxiosResponse<SendMsgHookResponse> = await axios.post(
+        'http://0.0.0.0:19088/api/?type=2',
+        requestBody,
+      );
+      console.log(response);
+      // Check Response
+      if (response && response.data) {
+        return response.data;
+      }
+
+      throw new Error('No response from API');
+    } catch (error: any) {
+      return { error: error.message || 'Error connecting to API' };
+    }
+  };
+
+  static hookMessage = async (): Promise<HookResponse | { error: string }> => {
     if (hookSettings.hookOrUnhook) {
       try {
         // Construct Request Body
@@ -130,6 +197,7 @@ export default class HookDirect {
           timeout: hookSettings.timeout,
           enableHttp: hookSettings.enableHttp,
         };
+        console.log(requestBody);
         // Send POST request
         const response: AxiosResponse<HookResponse> = await axios.post(
           'http://0.0.0.0:19088/api/?type=9', // Hook API Address
@@ -138,8 +206,10 @@ export default class HookDirect {
 
         // Check Response
         if (response && response.data) {
+          console.log(response.data);
           return response.data;
         }
+
         throw new Error('No response from API');
       } catch (error: any) {
         return { error: error.message || 'Error connecting to API' };
@@ -168,18 +238,19 @@ export default class HookDirect {
       // Construct Body
       const requestBody = {
         wxid: messageinfo.wxid,
-        msg: messageinfo.msg,
+        msg: messageinfo.msg.toString(),
       };
-
+      console.log(requestBody);
       const response: AxiosResponse<SendMsgHookResponse> = await axios.post(
         'http://0.0.0.0:19088/api/?type=2',
         requestBody,
       );
-
+      console.log(response);
       // Check Response
       if (response && response.data) {
         return response.data;
       }
+
       throw new Error('No response from API');
     } catch (error: any) {
       return { error: error.message || 'Error connecting to API' };
@@ -198,6 +269,28 @@ export default class HookDirect {
         requestBody,
       );
 
+      // Check Response
+      if (response && response.data) {
+        return response.data;
+      }
+      throw new Error('No response from API');
+    } catch (error: any) {
+      return { error: error.message || 'Error connecting to API' };
+    }
+  };
+
+  static getLoginInfo = async (): Promise<
+    ContactResponse | { error: string }
+  > => {
+    try {
+      // Construct Body
+      const requestBody = {};
+
+      const response: AxiosResponse<ContactResponse> = await axios.post(
+        'http://0.0.0.0:19088/api/?type=1',
+        requestBody,
+      );
+      console.log('Hook Login Info:', response);
       // Check Response
       if (response && response.data) {
         return response.data;

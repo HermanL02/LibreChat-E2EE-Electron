@@ -23,12 +23,13 @@ export default function WeChatConversationPage() {
   const [decryptedMessages, setDecryptedMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { latestPersonalKey } = usePersonalKeys();
+  const [messageToSend, setMessageToSend] = useState('');
+
   const scrollToBottom = () => {
     messagesEndRef?.current?.scrollIntoView({ behavior: 'smooth' });
   };
-  const [messageToSend, setMessageToSend] = useState('');
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessageToSend(e.target.value);
   };
 
@@ -38,7 +39,6 @@ export default function WeChatConversationPage() {
 
   useEffect(() => {
     const filterAndDecryptMessages = async () => {
-      console.log(info?.fromUser);
       const filteredMessages = messages.filter(
         (message) =>
           message.fromUser === info?.fromUser ||
@@ -58,12 +58,12 @@ export default function WeChatConversationPage() {
           }
         }),
       );
-      console.log('decrypted', decryptedMessages);
       setDecryptedMessages(decrypted);
     };
 
     filterAndDecryptMessages();
-  }, [messages, info, latestPersonalKey.privateKey, decryptedMessages]);
+  }, [messages, info, latestPersonalKey.privateKey]);
+
   function formatPublicKey(key: string) {
     const PEM_HEADER = '-----BEGIN RSA PUBLIC KEY-----';
     const PEM_FOOTER = '-----END RSA PUBLIC KEY-----';
@@ -83,12 +83,14 @@ export default function WeChatConversationPage() {
 
     return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
   }
+
   const handleChangeTextToPubKey = async () => {
     const response = await window.electronAPI.getPersonalKeys();
     console.log('Change Text Field');
-    handleInputChange(response);
+    handleInputChange({ target: { value: response } } as any);
   };
-  const handleSendMessage = async (message: any) => {
+
+  const handleSendMessage = async (message: string) => {
     try {
       const latestPublicKey = formatPublicKey(info?.content || '');
       if (latestPublicKey) {
@@ -101,7 +103,6 @@ export default function WeChatConversationPage() {
           wxid: info?.fromUser,
           msg: encryptedMessage,
         });
-        console.log('sending');
         addMessage({
           msgId: response.msgId,
           fromUser: 'me',
@@ -122,13 +123,14 @@ export default function WeChatConversationPage() {
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (messageToSend.trim()) {
       await handleSendMessage(messageToSend);
       setMessageToSend(''); // Clear the input field after sending
     }
   };
+
   if (!info) {
     return <div>No message info available</div>;
   }

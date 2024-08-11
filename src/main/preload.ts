@@ -45,8 +45,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   checkWechatLogin: () => ipcRenderer.invoke('check-wechat-login'),
   sendMessage: (message: any) => ipcRenderer.invoke('send-msg-hook', message),
   getContact: () => ipcRenderer.invoke('get-contact'),
+  getLoginInfo: () => ipcRenderer.invoke('get-logininfo'),
   hookWechat: (hookSettings: any) =>
     ipcRenderer.invoke('hook-wechat', hookSettings),
+  antiWeChatUpgrade: () => ipcRenderer.invoke('anti-wechat-upgrade'),
+  installWeChat: () => ipcRenderer.invoke('install-wechat'),
   receiveMessage: (callback: any) =>
     ipcRenderer.on('displayMessage', (event, message) => callback(message)),
 });

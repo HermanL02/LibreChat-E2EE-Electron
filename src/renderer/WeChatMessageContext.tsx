@@ -20,8 +20,7 @@ interface WeChatMessageContextType {
   messages: Message[];
   listening: boolean;
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  listenForPublicKey: () => void;
-  sendPublicKeyAndStartChat: () => void;
+  listenForPublicKey: (status: boolean) => void;
   addMessage: (message: Message) => void;
 }
 
@@ -83,14 +82,10 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [navigate, listening]);
 
-  const listenForPublicKey = () => {
-    setListening(true);
+  const listenForPublicKey = (status: boolean) => {
+    setListening(status);
   };
 
-  const sendPublicKeyAndStartChat = () => {
-    navigate('/WeChatOperation/WeChatContact');
-    setListening(false);
-  };
   const addMessage = (message: Message) => {
     console.log('adding Message');
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -103,7 +98,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
         listening,
         setMessages,
         listenForPublicKey,
-        sendPublicKeyAndStartChat,
+
         addMessage,
       }}
     >

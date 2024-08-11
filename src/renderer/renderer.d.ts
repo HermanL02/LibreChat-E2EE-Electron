@@ -10,9 +10,12 @@ export interface IElectronAPI {
   getPersonalKeys: () => Promise<any>;
   checkWechatLogin: () => Promise<any>;
   hookWechat: (hookSettings: any) => Promise<any>;
+  antiWeChatUpgrade: () => Promise<any>;
+  installWeChat: () => Promise<any>;
   receiveMessage: (callback: any) => Promise<any>;
   sendMessage: (message: any) => Promise<any>;
   getContact: () => Promise<any>;
+  getLoginInfo: () => Promise<any>;
 }
 
 declare global {

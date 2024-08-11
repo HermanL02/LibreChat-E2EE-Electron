@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import usePersonalKeys from '../Components/subComponents/usePersonalKeys';
+import { useWeChatMessages } from '../WeChatMessageContext';
 
 interface Contact {
   customAccount: string;
@@ -22,9 +24,10 @@ const getContactList = async (): Promise<
 };
 
 export default function WeChatContact() {
+  const { listenForPublicKey } = useWeChatMessages();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [error, setError] = useState<string | null>(null);
-
+  const { latestPersonalKey } = usePersonalKeys();
   const fetchContacts = async () => {
     const result = await getContactList();
     if ('error' in result) {
@@ -34,9 +37,19 @@ export default function WeChatContact() {
       setError(null);
     }
   };
-  const handleContactClick = (contact: Contact) => {
+  const handleContactClick = async (contact: Contact) => {
     // Handle the click event for the contact
-    alert(`Clicked on contact: ${contact.userName}`);
+    const loginInfo = await window.electronAPI.getLoginInfo();
+    const message = {
+      publicKey: latestPersonalKey.publicKey,
+      userId: loginInfo.signature,
+      userName: loginInfo.wxid,
+    };
+    listenForPublicKey(true);
+    await window.electronAPI.sendMessage({
+      wxid: contact.wxid,
+      msg: message,
+    });
   };
   return (
     <div className="bg-white text-gray-800 p-6 rounded-lg shadow-md">

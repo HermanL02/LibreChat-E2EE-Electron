@@ -13,4 +13,7 @@ echo Y|cacls %USERPROFILE%\AppData\Roaming\Tencent\WeChat\patch /T /P %USERNAME%
 echo PATCH-EDIT-DONE
 
 echo SETTING-SUCCESS-EXITING
-timeout /nobreak /t 2 >nul 2>nul exit
+timeout /nobreak /t 2 >nul 2>nul
+
+pause
+exit
