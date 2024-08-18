@@ -64,25 +64,25 @@ export default function WeChatConversationPage() {
     filterAndDecryptMessages();
   }, [messages, info, latestPersonalKey.privateKey]);
 
-  function formatPublicKey(key: string) {
-    const PEM_HEADER = '-----BEGIN PUBLIC KEY-----';
-    const PEM_FOOTER = '-----END PUBLIC KEY-----';
-    const MAX_LINE_LENGTH = 64;
+  // function formatPublicKey(key: string) {
+  //   const PEM_HEADER = '-----BEGIN PUBLIC KEY-----';
+  //   const PEM_FOOTER = '-----END PUBLIC KEY-----';
+  //   const MAX_LINE_LENGTH = 64;
 
-    // Remove any existing white space, PEM header, and footer from the key
-    const formattedKey = key
-      .replace(PEM_HEADER, '')
-      .replace(PEM_FOOTER, '')
-      .replace(/\s+/g, '');
+  //   // Remove any existing white space, PEM header, and footer from the key
+  //   const formattedKey = key
+  //     .replace(PEM_HEADER, '')
+  //     .replace(PEM_FOOTER, '')
+  //     .replace(/\s+/g, '');
 
-    // Insert line breaks every 64 characters
-    let result = '';
-    for (let i = 0; i < formattedKey.length; i += MAX_LINE_LENGTH) {
-      result += `${formattedKey.substring(i, i + MAX_LINE_LENGTH)}\n`;
-    }
+  //   // Insert line breaks every 64 characters
+  //   let result = '';
+  //   for (let i = 0; i < formattedKey.length; i += MAX_LINE_LENGTH) {
+  //     result += `${formattedKey.substring(i, i + MAX_LINE_LENGTH)}\n`;
+  //   }
 
-    return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
-  }
+  //   return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
+  // }
 
   const handleChangeTextToPubKey = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -112,7 +112,7 @@ export default function WeChatConversationPage() {
         jsonfiedInfoContent = JSON.parse(info?.content);
       }
       const { publicKey } = jsonfiedInfoContent;
-      const latestPublicKey = formatPublicKey(publicKey || '');
+      const latestPublicKey = publicKey;
 
       if (latestPublicKey) {
         const encryptedMessage = await window.electronAPI.encrypt(

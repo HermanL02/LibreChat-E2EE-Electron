@@ -17,6 +17,7 @@ export default class Encryptor {
   }
 
   static decrypt(encryptedText: string, privateKey: string): string {
+    console.log(privateKey);
     const decrypted = crypto.privateDecrypt(
       {
         key: privateKey,
