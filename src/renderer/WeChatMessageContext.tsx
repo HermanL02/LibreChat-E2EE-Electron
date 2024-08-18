@@ -44,6 +44,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [listening, setListening] = useState(false);
+  const [myWXID, setMyWXID] = useState('');
   const navigate = useNavigate();
   useEffect(() => {
     window.electronAPI.receiveMessage((message: Message) => {
@@ -56,7 +57,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
 
           if (publicKey) {
             // In case the message is sent by myself
-            if (message.fromUser !== '') {
+            if (message.fromUser !== '' && message.fromUser !== myWXID) {
               navigate('/WeChatOperation/ChatPage', {
                 state: { info: message },
               });
@@ -83,8 +84,13 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [navigate, listening]);
 
-  const listenForPublicKey = (status: boolean) => {
+  const listenForPublicKey = async (status: boolean) => {
     setListening(status);
+    const myLoginInfo = await window.electronAPI.getLoginInfo();
+    console.log(myLoginInfo);
+    const { wxid } = myLoginInfo.data;
+    console.log(wxid);
+    setMyWXID(wxid);
   };
 
   const addMessage = (message: Message) => {
