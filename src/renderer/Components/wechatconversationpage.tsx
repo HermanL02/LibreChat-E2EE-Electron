@@ -65,8 +65,8 @@ export default function WeChatConversationPage() {
   }, [messages, info, latestPersonalKey.privateKey]);
 
   function formatPublicKey(key: string) {
-    const PEM_HEADER = '-----BEGIN RSA PUBLIC KEY-----';
-    const PEM_FOOTER = '-----END RSA PUBLIC KEY-----';
+    const PEM_HEADER = '-----BEGIN PUBLIC KEY-----';
+    const PEM_FOOTER = '-----END PUBLIC KEY-----';
     const MAX_LINE_LENGTH = 64;
 
     // Remove any existing white space, PEM header, and footer from the key
@@ -85,14 +85,28 @@ export default function WeChatConversationPage() {
   }
 
   const handleChangeTextToPubKey = async () => {
-    const response = await window.electronAPI.getPersonalKeys();
-    console.log('Change Text Field');
-    handleInputChange({ target: { value: response } } as any);
+    const loginInfo = await window.electronAPI.getLoginInfo();
+    const message = {
+      publicKey: latestPersonalKey.publicKey,
+      userId: loginInfo.data.signature,
+      userName: loginInfo.data.wxid,
+    };
+
+    await window.electronAPI.sendMessage({
+      wxid: info?.fromUser,
+      msg: JSON.stringify(message),
+    });
   };
 
   const handleSendMessage = async (message: string) => {
     try {
-      const latestPublicKey = formatPublicKey(info?.content || '');
+      let jsonfiedInfoContent;
+      if (info?.content) {
+        jsonfiedInfoContent = JSON.parse(info?.content);
+      }
+      const { publicKey } = jsonfiedInfoContent;
+      const latestPublicKey = formatPublicKey(publicKey || '');
+
       if (latestPublicKey) {
         const encryptedMessage = await window.electronAPI.encrypt(
           message,

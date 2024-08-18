@@ -33,6 +33,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // keystore operations
   insertFriend: (name: String, publicKey: any) =>
     ipcRenderer.invoke('insert-friend', name, publicKey),
+  importPersonalKeys: (publicKey: String, privateKey: any) =>
+    ipcRenderer.invoke('import-personal-keys', publicKey, privateKey),
   // encryptor operations
   encrypt: (text: string, publicKey: string) =>
     ipcRenderer.invoke('encrypt', text, publicKey),

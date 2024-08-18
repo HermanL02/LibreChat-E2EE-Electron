@@ -60,6 +60,9 @@ ipcMain.handle('get-all-friends', async () => {
 ipcMain.handle('insert-friend', async (event, name, publicKey) => {
   return KeyStore.insertFriend(name, publicKey);
 });
+ipcMain.handle('import-personal-keys', async (event, publicKey, privateKey) => {
+  return KeyStore.importPersonalKeys(publicKey, privateKey);
+});
 ipcMain.handle('update-personal-keys', async () => {
   return KeyStore.updatePersonalKeys();
 });

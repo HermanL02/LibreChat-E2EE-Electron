@@ -3,14 +3,27 @@ import crypto from 'crypto';
 
 export default class Encryptor {
   static encrypt(text: string, publicKey: string): string {
-    const buffer = Buffer.from(text, 'utf8');
-    const encrypted = crypto.publicEncrypt(publicKey, buffer);
+    console.log(text);
+    console.log(publicKey);
+    const encrypted = crypto.publicEncrypt(
+      {
+        key: publicKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      Buffer.from(text),
+    );
+    console.log(encrypted);
     return encrypted.toString('base64');
   }
 
   static decrypt(encryptedText: string, privateKey: string): string {
-    const buffer = Buffer.from(encryptedText, 'base64');
-    const decrypted = crypto.privateDecrypt(privateKey, buffer);
+    const decrypted = crypto.privateDecrypt(
+      {
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      Buffer.from(encryptedText, 'base64'),
+    );
     return decrypted.toString('utf8');
   }
 

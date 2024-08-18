@@ -61,6 +61,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
                 state: { info: message },
               });
               setListening(false);
+              alert('Haha');
             }
           }
         } catch (error) {

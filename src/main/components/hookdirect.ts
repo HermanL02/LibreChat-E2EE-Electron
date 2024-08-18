@@ -36,8 +36,15 @@ interface SendImageHookSettings {
 }
 interface SendMsgHookResponse {
   code: number;
-  msg: string;
-  data: object | null;
+  result: string;
+}
+interface SendImageHookResponse {
+  code: number;
+  result: string;
+}
+interface getMsgAttachmentHookResponse {
+  code: number;
+  result: string;
 }
 
 interface Contact {
@@ -160,18 +167,18 @@ export default class HookDirect {
     }
   };
 
-  static sendMsg = async (
-    messageinfo: SendMsgHookSettings,
-  ): Promise<SendMsgHookResponse | { error: string }> => {
+  static sendImage = async (
+    messageinfo: SendImageHookSettings,
+  ): Promise<SendImageHookResponse | { error: string }> => {
     try {
       // Construct Body
       const requestBody = {
         wxid: messageinfo.wxid,
-        msg: messageinfo.msg.toString(),
+        msg: messageinfo.imagePath,
       };
       console.log(requestBody);
-      const response: AxiosResponse<SendMsgHookResponse> = await axios.post(
-        'http://0.0.0.0:19088/api/?type=2',
+      const response: AxiosResponse<SendImageHookResponse> = await axios.post(
+        'http://0.0.0.0:19088/api/?type=5',
         requestBody,
       );
       console.log(response);
@@ -186,7 +193,32 @@ export default class HookDirect {
     }
   };
 
-  static hookMessage = async (): Promise<HookResponse | { error: string }> => {
+  static getMsgAttachment = async (
+    msgId: string,
+  ): Promise<getMsgAttachmentHookResponse | { error: string }> => {
+    try {
+      // Construct Body
+      const requestBody = {
+        msgId,
+      };
+      console.log(requestBody);
+      const response: AxiosResponse<getMsgAttachmentHookResponse> =
+        await axios.post('http://0.0.0.0:19088/api/?type=56', requestBody);
+      console.log(response);
+      // Check Response
+      if (response && response.data) {
+        return response.data;
+      }
+
+      throw new Error('No response from API');
+    } catch (error: any) {
+      return { error: error.message || 'Error connecting to API' };
+    }
+  };
+
+  static hookMessage = async (
+    hookSettings: HookSettings,
+  ): Promise<HookResponse | { error: string }> => {
     if (hookSettings.hookOrUnhook) {
       try {
         // Construct Request Body

@@ -1,6 +1,7 @@
 export interface IElectronAPI {
   // keystore operations
   insertFriend: (friendName: any, publicKey: any) => Promise<void>;
+  importPersonalKeys: (publicKey: any, privateKey: any) => Promise<any>;
   // encryptor operations
   encrypt: (text: string, publicKey: string) => Promise<string>;
   decrypt: (encryptedText: string, privateKey: string) => Promise<string>;

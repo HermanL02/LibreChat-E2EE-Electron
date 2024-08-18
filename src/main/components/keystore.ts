@@ -73,6 +73,22 @@ export default class KeyStore {
     });
   }
 
+  static async importPersonalKeys(
+    publicKey: string,
+    privateKey: string,
+  ): Promise<any> {
+    const doc = { publicKey, privateKey, date: new Date().getTime() };
+    return new Promise((resolve, reject) => {
+      personalDB.insert(doc, (err, newDoc) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(newDoc);
+        }
+      });
+    });
+  }
+
   static async getPersonalKeys(): Promise<any[]> {
     return new Promise((resolve, reject) => {
       personalDB.find(

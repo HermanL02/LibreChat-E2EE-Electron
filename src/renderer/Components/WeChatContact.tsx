@@ -46,8 +46,11 @@ export default function WeChatContact() {
   const handleContactClick = async (contact: Contact) => {
     // Handle the click event for the contact
     const loginInfo = await window.electronAPI.getLoginInfo();
+    const cleanedPublicKey = latestPersonalKey.publicKey
+      .replace('-----BEGIN RSA PUBLIC KEY-----\n', '')
+      .replace('\n-----END RSA PUBLIC KEY-----\n', '');
     const message = {
-      publicKey: latestPersonalKey.publicKey,
+      publicKey: cleanedPublicKey,
       userId: loginInfo.data.signature,
       userName: loginInfo.data.wxid,
     };
