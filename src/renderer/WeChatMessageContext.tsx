@@ -57,12 +57,13 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
 
           if (publicKey) {
             // In case the message is sent by myself
-            if (message.fromUser !== '' && message.fromUser !== myWXID) {
+            // eslint-disable-next-line eqeqeq
+            if (message.fromUser != '' && message.fromUser != myWXID) {
+              alert(JSON.stringify(message));
               navigate('/WeChatOperation/ChatPage', {
                 state: { info: message },
               });
               setListening(false);
-              alert('Haha');
             }
           }
         } catch (error) {

@@ -84,18 +84,25 @@ export default function WeChatConversationPage() {
     return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
   }
 
-  const handleChangeTextToPubKey = async () => {
-    const loginInfo = await window.electronAPI.getLoginInfo();
-    const message = {
-      publicKey: latestPersonalKey.publicKey,
-      userId: loginInfo.data.signature,
-      userName: loginInfo.data.wxid,
-    };
+  const handleChangeTextToPubKey = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ) => {
+    e.preventDefault();
+    try {
+      const loginInfo = await window.electronAPI.getLoginInfo();
+      const message = {
+        publicKey: latestPersonalKey.publicKey,
+        userId: loginInfo.data.signature,
+        userName: loginInfo.data.wxid,
+      };
 
-    await window.electronAPI.sendMessage({
-      wxid: info?.fromUser,
-      msg: JSON.stringify(message),
-    });
+      await window.electronAPI.sendMessage({
+        wxid: info?.fromUser,
+        msg: JSON.stringify(message),
+      });
+    } catch (error) {
+      console.error('Error sending public key:', error);
+    }
   };
 
   const handleSendMessage = async (message: string) => {
