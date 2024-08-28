@@ -83,7 +83,7 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
         return [...prevMessages, message]; // If Not Exist, add new msg.
       });
     });
-  }, [navigate, listening]);
+  }, [navigate, listening, myWXID]);
 
   const listenForPublicKey = async (status: boolean) => {
     setListening(status);
