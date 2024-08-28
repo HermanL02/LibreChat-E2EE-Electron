@@ -1,19 +1,11 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 
-/**
- * This module executes inside of electron's main process. You can start
- * electron renderer process from here and communicate with the other processes
- * through IPC.
- *
- * When running `npm run build` or `npm run build:main`, this file is compiled to
- * `./src/main.js` using webpack. This gives us some performance wins.
- */
 import path from 'path';
 import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import express, { Request, Response } from 'express';
-import { Server } from 'http';
+import { Server } from 'net'; // Import the 'net' module
+import JSONBig from 'json-bigint';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import KeyStore from './components/keystore';
@@ -23,22 +15,7 @@ import HookDirect from './components/hookdirect';
 const globalAny: any = global;
 globalAny.sharedPort = 3000;
 globalAny.hooked = false;
-const newExpressServer = express();
-newExpressServer.use(express.json());
-const server: Server = newExpressServer.listen(globalAny.sharedPort, () => {
-  console.log(`Server listening at http://localhost:${globalAny.sharedPort}`);
-});
-server.on('error', (error: any) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${globalAny.sharedPort} is already in use.`);
-    // Attempt Another Port
-    server.close();
-    globalAny.sharedPort += 1;
-    server.listen(globalAny.sharedPort);
-  } else {
-    console.error(error);
-  }
-});
+
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -48,6 +25,54 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+// Create a TCP server
+const server = new Server((socket) => {
+  socket.on('data', (data) => {
+    console.log(globalAny.hooked);
+    console.log('Received data:', data.toString());
+    // Convert buffer to string
+    const dataString = data.toString();
+
+    // Split the string at the double newline to separate headers from body
+    const parts = dataString.split('\r\n\r\n');
+
+    if (parts.length > 1) {
+      const jsonPart = parts[1]; // The JSON body will be after the double newline
+
+      try {
+        const jsonData = JSONBig.parse(jsonPart);
+        console.log('Extracted JSON:', jsonData);
+        console.log(BigInt(jsonData.msgId).toString());
+        // You can now work with the JSON data
+        // For example, you could send it to the mainWindow in Electron:
+        if (mainWindow) {
+          mainWindow.webContents.send('displayMessage', jsonData);
+        }
+
+        socket.write('Message received\n');
+      } catch (error) {
+        console.error('Failed to parse JSON:', error);
+        socket.write('Error processing message\n');
+      }
+    } else {
+      console.log('No JSON body found in the received data');
+      socket.write('No JSON body found\n');
+    }
+  });
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+  });
+});
+
+// Start listening on the shared port
+server.listen(globalAny.sharedPort, () => {
+  console.log(`TCP Server listening on port ${globalAny.sharedPort}`);
+});
+
+server.on('error', (error) => {
+  console.error('Server error:', error);
+});
 // IPC handlers
 ipcMain.on('request-shared-port', (event) => {
   console.log(globalAny.sharedPort);
@@ -179,6 +204,7 @@ const createWindow = async () => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
+
   ipcMain.on('show-dialog', (event, arg) => {
     if (mainWindow) {
       const { title, message, type, buttons } = arg;
@@ -199,6 +225,7 @@ const createWindow = async () => {
       console.log('Unable to show dialog，mainWindow == null。');
     }
   });
+
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
@@ -207,17 +234,7 @@ const createWindow = async () => {
 /**
  * Add event listeners...
  */
-newExpressServer.post('/', (req: Request, res: Response) => {
-  console.log(globalAny.hooked);
-  console.log(req.body);
-  if (mainWindow) {
-    mainWindow.webContents.send('displayMessage', req.body);
-  }
-  res.status(200).send('Message received');
-});
 app.on('window-all-closed', () => {
-  // Respect the OSX convention of having the application in memory even
-  // after all windows have been closed
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -228,8 +245,6 @@ app
   .then(() => {
     createWindow();
     app.on('activate', () => {
-      // On macOS it's common to re-create a window in the app when the
-      // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
     });
   })
