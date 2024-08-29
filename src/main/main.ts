@@ -28,14 +28,10 @@ let mainWindow: BrowserWindow | null = null;
 // Create a TCP server
 const server = new Server((socket) => {
   socket.on('data', (data) => {
-    console.log(globalAny.hooked);
-    console.log('Received data:', data.toString());
-    // Convert buffer to string
-
     try {
       const jsonData = JSONBig.parse(data.toString());
-      console.log('Extracted JSON:', jsonData);
-      console.log(BigInt(jsonData.msgId).toString());
+      // console.log('Extracted JSON:', jsonData);
+      // console.log(BigInt(jsonData.msgId).toString());
       // You can now work with the JSON data
       // For example, you could send it to the mainWindow in Electron:
       if (mainWindow) {
@@ -97,8 +93,13 @@ ipcMain.handle('decrypt', async (event, text, privateKey) => {
 });
 ipcMain.handle(
   'decrypt-photo',
-  async (event, encryptedPhotoPath: string, privateKey: string) => {
-    return Encryptor.decryptPhoto(encryptedPhotoPath, privateKey);
+  async (
+    event,
+    encryptedPhotoPath: string,
+    privateKey: string,
+    encryptedKey: string,
+  ) => {
+    return Encryptor.decryptPhoto(encryptedPhotoPath, privateKey, encryptedKey);
   },
 );
 ipcMain.handle('check-wechat-login', async () => {

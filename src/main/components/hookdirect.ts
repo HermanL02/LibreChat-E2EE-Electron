@@ -177,14 +177,13 @@ export default class HookDirect {
         wxid: messageinfo.wxid,
         filePath: messageinfo.imagePath,
       };
-      console.log(requestBody);
       const response: AxiosResponse<SendImageHookResponse> = await axios.post(
         'http://0.0.0.0:19088/api/?type=6',
         requestBody,
       );
-      console.log(response);
       // Check Response
       if (response && response.data) {
+        console.log(response.data);
         return response.data;
       }
 
@@ -202,10 +201,10 @@ export default class HookDirect {
       const requestBody = {
         msgId,
       };
-      console.log(requestBody);
+
       const response: AxiosResponse<getMsgAttachmentHookResponse> =
         await axios.post('http://0.0.0.0:19088/api/?type=56', requestBody);
-      console.log(response);
+
       // Check Response
       if (response && response.data) {
         return response.data;

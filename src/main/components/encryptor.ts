@@ -1,4 +1,3 @@
-// Encryptor.ts
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -20,7 +19,6 @@ export default class Encryptor {
   }
 
   static decrypt(encryptedText: string, privateKey: string): string {
-    console.log(privateKey);
     const decrypted = crypto.privateDecrypt(
       {
         key: privateKey,
@@ -31,20 +29,55 @@ export default class Encryptor {
     return decrypted.toString('utf8');
   }
 
-  static encryptPhoto(photoPath: string, publicKey: string): string {
-    // Read the photo file
-    const photoBuffer = fs.readFileSync(photoPath);
-
-    // Encrypt the photo using the public key
+  static encrypt2(text: Buffer, publicKey: string): string {
     const encrypted = crypto.publicEncrypt(
       {
         key: publicKey,
         padding: crypto.constants.RSA_PKCS1_PADDING,
       },
-      photoBuffer,
+      text,
     );
+    return encrypted.toString('base64');
+  }
 
-    // Generate a hash of the photo path and truncate it
+  static decrypt2(encryptedText: string, privateKey: string): Buffer {
+    const decrypted = crypto.privateDecrypt(
+      {
+        key: privateKey,
+        padding: crypto.constants.RSA_PKCS1_PADDING,
+      },
+      Buffer.from(encryptedText, 'base64'),
+    );
+    return decrypted;
+  }
+
+  static encryptPhoto(
+    photoPath: string,
+    publicKey: string,
+  ): { encryptedPath: string; encryptedKey: string } {
+    // Generate a random symmetric encryption key (AES) - 128-bit key
+    const symmetricKey = crypto.randomBytes(16); // 128-bit key for AES-128
+
+    // Read the photo file
+    const photoBuffer = fs.readFileSync(photoPath);
+
+    // Generate a random initialization vector (IV)
+    const iv = crypto.randomBytes(16);
+
+    // Encrypt the photo using the symmetric key and IV
+    const cipher = crypto.createCipheriv('aes-128-cbc', symmetricKey, iv);
+    const encryptedPhoto = Buffer.concat([
+      cipher.update(photoBuffer),
+      cipher.final(),
+    ]);
+
+    // Prepend the IV to the encrypted photo
+    const encryptedPhotoWithIv = Buffer.concat([iv, encryptedPhoto]);
+
+    // Encrypt the symmetric key using the public key
+    const encryptedKey = this.encrypt2(symmetricKey, publicKey);
+
+    // Generate a hash for the photo path and truncate it
     const hash = crypto
       .createHash('sha256')
       .update(photoPath)
@@ -52,35 +85,46 @@ export default class Encryptor {
       .slice(0, 12);
     const tempPath = path.join(os.tmpdir(), `${hash}.enc`);
 
-    // Write the encrypted file to the temporary directory
-    fs.writeFileSync(tempPath, encrypted);
+    // Write the encrypted photo to a temporary directory
+    fs.writeFileSync(tempPath, encryptedPhotoWithIv);
 
-    return tempPath;
+    return {
+      encryptedPath: tempPath,
+      encryptedKey,
+    };
   }
 
-  static decryptPhoto(encryptedPhotoPath: string, privateKey: string): string {
-    // Read the encrypted file
+  static decryptPhoto(
+    encryptedPhotoPath: string,
+    privateKey: string,
+    encryptedKey: string,
+  ): string {
+    // Decrypt the symmetric key using the private key
+    const symmetricKey = this.decrypt2(encryptedKey, privateKey);
+
+    // Read the encrypted photo file
     const encryptedBuffer = fs.readFileSync(encryptedPhotoPath);
 
-    // Decrypt the file using the private key
-    const decrypted = crypto.privateDecrypt(
-      {
-        key: privateKey,
-        padding: crypto.constants.RSA_PKCS1_PADDING,
-      },
-      encryptedBuffer,
-    );
+    // Extract the IV from the encrypted file
+    const iv = encryptedBuffer.slice(0, 16);
+    const encryptedPhoto = encryptedBuffer.slice(16);
 
-    // Extract the original file name from the encrypted file name
+    // Decrypt the photo using the symmetric key and IV
+    const decipher = crypto.createDecipheriv('aes-128-cbc', symmetricKey, iv);
+    const decryptedPhoto = Buffer.concat([
+      decipher.update(encryptedPhoto),
+      decipher.final(),
+    ]);
+
+    // Generate the output file path
     const originalFileName = path.basename(encryptedPhotoPath, '.enc');
     const outputPath = path.join(
       path.dirname(encryptedPhotoPath),
-      originalFileName,
+      `${originalFileName}.jpg`,
     );
 
-    // Write the decrypted file with the original file name
-    fs.writeFileSync(outputPath, decrypted);
-
+    // Write the decrypted photo to the output path
+    fs.writeFileSync(outputPath, decryptedPhoto);
     return outputPath;
   }
 

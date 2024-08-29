@@ -42,8 +42,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('decrypt', encryptedText, privateKey),
   encryptPhoto: (photoPath: string, publicKey: string) =>
     ipcRenderer.invoke('encrypt-photo', photoPath, publicKey),
-  decryptPhoto: (encryptedPhotoPath: string, privateKey: string) =>
-    ipcRenderer.invoke('decrypt-photo', encryptedPhotoPath, privateKey),
+  decryptPhoto: (
+    encryptedPhotoPath: string,
+    privateKey: string,
+    encryptedKey: string,
+  ) =>
+    ipcRenderer.invoke(
+      'decrypt-photo',
+      encryptedPhotoPath,
+      privateKey,
+      encryptedKey,
+    ),
   generateKeyPair: () => ipcRenderer.invoke('generate-key-pair'),
   getAllFriends: () => ipcRenderer.invoke('get-all-friends'),
   updatePersonalKeys: () => ipcRenderer.invoke('update-personal-keys'),

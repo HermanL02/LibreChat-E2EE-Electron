@@ -9,14 +9,7 @@ import {
 export default function WeChatHook() {
   const { messages, listening, listenForPublicKey } = useWeChatMessages();
   const [isContactListOpen, setContactListOpen] = useState(false);
-  let sharedPortUse = 3000;
-  window.electron.ipcRenderer.on(
-    'response-shared-port',
-    (event, sharedPort: any) => {
-      console.log(sharedPort); // Should output 3000
-      sharedPortUse = sharedPort;
-    },
-  );
+
   window.electron.ipcRenderer.sendMessage('request-shared-port');
   const url = ``;
   const hookWechat = async () => {

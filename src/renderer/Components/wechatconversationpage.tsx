@@ -48,20 +48,34 @@ export default function WeChatConversationPage() {
         filteredMessages.map(async (message) => {
           try {
             if (message?.path) {
-              // Decrypt the message, set the
+              return null;
             }
             const decryptedContent = await window.electronAPI.decrypt(
               message.content,
               latestPersonalKey.privateKey,
             );
+
             return { ...message, content: decryptedContent };
           } catch (error) {
-            console.log('Decryption failed', error);
+            try {
+              const { encryptedPhotoPath, encryptedKey } = JSON.parse(
+                message.content,
+              );
+              const decryptedPhotoPath = await window.electronAPI.decryptPhoto(
+                encryptedPhotoPath,
+                latestPersonalKey.privateKey,
+                encryptedKey,
+              );
+              const json = { imgPath: decryptedPhotoPath };
+              return { ...message, content: JSON.stringify(json) };
+            } catch (err) {
+              console.log(err);
+            }
             return { ...message, content: message.content };
           }
         }),
       );
-      setDecryptedMessages(decrypted);
+      setDecryptedMessages(decrypted.filter((msg) => msg !== null));
     };
 
     filterAndDecryptMessages();
@@ -101,15 +115,20 @@ export default function WeChatConversationPage() {
       }
       if (message.includes('imagePath')) {
         // Handle Send Image Here
-        const { imagePath } = JSON.parse(message);
-        const filePath = await window.electronAPI.encryptPhoto(
-          imagePath,
-          latestPublicKey,
-        );
+        const jsonFile = JSON.parse(message); // Assuming message is a valid JSON string
+
+        const { encryptedPath, encryptedKey } =
+          await window.electronAPI.encryptPhoto(
+            jsonFile.imagePath,
+            latestPublicKey,
+          );
+
         const response = await window.electronAPI.sendImage({
           wxid: info?.fromUser,
-          imagePath: filePath,
+          imagePath: encryptedPath,
+          encryptedKey,
         });
+
         addMessage({
           msgId: response.msgId,
           fromUser: 'me',

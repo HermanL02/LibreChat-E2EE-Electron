@@ -8,6 +8,7 @@ export interface IElectronAPI {
   decryptPhoto: (
     encryptedPhotoPath: string,
     privateKey: string,
+    encryptedKey: string,
   ) => Promise<any>;
   decrypt: (encryptedText: string, privateKey: string) => Promise<string>;
   generateKeyPair: () => Promise<{ publicKey: string; privateKey: string }>;
