@@ -1,7 +1,8 @@
 /* eslint import/prefer-default-export: off */
 import { URL } from 'url';
 import path from 'path';
-import * as isDev from 'electron-is-dev';
+
+const { app } = require('electron');
 
 export function resolveHtmlPath(htmlFileName: string) {
   if (process.env.NODE_ENV === 'development') {
@@ -13,8 +14,9 @@ export function resolveHtmlPath(htmlFileName: string) {
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
 export function getInjectorPath() {
-  const basePath = isDev
-    ? path.resolve(__dirname, '../../assets/tools')
-    : path.join(process.resourcesPath, 'assets/tools');
-  return basePath;
+  const RESOURCES_PATH = app.isPackaged
+    ? path.join(process.resourcesPath, 'assets')
+    : path.join(__dirname, '../../assets');
+
+  return path.join(RESOURCES_PATH, 'tools');
 }
