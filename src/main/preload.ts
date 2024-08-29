@@ -40,12 +40,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('encrypt', text, publicKey),
   decrypt: (encryptedText: string, privateKey: string) =>
     ipcRenderer.invoke('decrypt', encryptedText, privateKey),
+  encryptPhoto: (photoPath: string, publicKey: string) =>
+    ipcRenderer.invoke('encrypt-photo', photoPath, publicKey),
+  decryptPhoto: (encryptedPhotoPath: string, privateKey: string) =>
+    ipcRenderer.invoke('decrypt-photo', encryptedPhotoPath, privateKey),
   generateKeyPair: () => ipcRenderer.invoke('generate-key-pair'),
   getAllFriends: () => ipcRenderer.invoke('get-all-friends'),
   updatePersonalKeys: () => ipcRenderer.invoke('update-personal-keys'),
   getPersonalKeys: () => ipcRenderer.invoke('get-personal-keys'),
   checkWechatLogin: () => ipcRenderer.invoke('check-wechat-login'),
   sendMessage: (message: any) => ipcRenderer.invoke('send-msg-hook', message),
+  sendImage: (message: any) => ipcRenderer.invoke('send-image-hook', message),
   getContact: () => ipcRenderer.invoke('get-contact'),
   getLoginInfo: () => ipcRenderer.invoke('get-logininfo'),
   hookWechat: (hookSettings: any) =>

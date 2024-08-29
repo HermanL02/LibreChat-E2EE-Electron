@@ -18,15 +18,15 @@ export default function WeChatHook() {
     },
   );
   window.electron.ipcRenderer.sendMessage('request-shared-port');
-  const url = `http://localhost:${sharedPortUse}`;
+  const url = ``;
   const hookWechat = async () => {
     const hooksettings = {
       hookOrUnhook: true,
       port: '3000',
-      ip: '0.0.0.0',
+      ip: '127.0.0.1',
       url,
-      timeout: '3000',
-      enableHttp: true,
+      timeout: '30000',
+      enableHttp: false,
     };
     const response = await window.electronAPI.hookWechat(hooksettings);
     if (response) {

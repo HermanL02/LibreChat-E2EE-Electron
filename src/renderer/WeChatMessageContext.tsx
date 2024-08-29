@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 type Message = {
+  path?: string;
   content: string;
   createTime: number;
   displayFullContent: string;

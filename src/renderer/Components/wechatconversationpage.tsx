@@ -47,6 +47,9 @@ export default function WeChatConversationPage() {
       const decrypted = await Promise.all(
         filteredMessages.map(async (message) => {
           try {
+            if (message?.path) {
+              // Decrypt the message, set the
+            }
             const decryptedContent = await window.electronAPI.decrypt(
               message.content,
               latestPersonalKey.privateKey,
@@ -63,26 +66,6 @@ export default function WeChatConversationPage() {
 
     filterAndDecryptMessages();
   }, [messages, info, latestPersonalKey.privateKey]);
-
-  // function formatPublicKey(key: string) {
-  //   const PEM_HEADER = '-----BEGIN PUBLIC KEY-----';
-  //   const PEM_FOOTER = '-----END PUBLIC KEY-----';
-  //   const MAX_LINE_LENGTH = 64;
-
-  //   // Remove any existing white space, PEM header, and footer from the key
-  //   const formattedKey = key
-  //     .replace(PEM_HEADER, '')
-  //     .replace(PEM_FOOTER, '')
-  //     .replace(/\s+/g, '');
-
-  //   // Insert line breaks every 64 characters
-  //   let result = '';
-  //   for (let i = 0; i < formattedKey.length; i += MAX_LINE_LENGTH) {
-  //     result += `${formattedKey.substring(i, i + MAX_LINE_LENGTH)}\n`;
-  //   }
-
-  //   return `${PEM_HEADER}\n${result}${PEM_FOOTER}`;
-  // }
 
   const handleChangeTextToPubKey = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -104,7 +87,6 @@ export default function WeChatConversationPage() {
       console.error('Error sending public key:', error);
     }
   };
-
   const handleSendMessage = async (message: string) => {
     try {
       let jsonfiedInfoContent;
@@ -114,7 +96,34 @@ export default function WeChatConversationPage() {
       const { publicKey } = jsonfiedInfoContent;
       const latestPublicKey = publicKey;
 
-      if (latestPublicKey) {
+      if (!latestPublicKey) {
+        console.error('No public key available');
+      }
+      if (message.includes('imagePath')) {
+        // Handle Send Image Here
+        const { imagePath } = JSON.parse(message);
+        const filePath = await window.electronAPI.encryptPhoto(
+          imagePath,
+          latestPublicKey,
+        );
+        const response = await window.electronAPI.sendImage({
+          wxid: info?.fromUser,
+          imagePath: filePath,
+        });
+        addMessage({
+          msgId: response.msgId,
+          fromUser: 'me',
+          content: message,
+          createTime: Date.now(),
+          displayFullContent: message,
+          msgSequence: Math.random(),
+          pid: 1,
+          signature: '',
+          toUser: info?.fromUser || '',
+          type: 1,
+        });
+      } else {
+        // Handle Send Message Here
         const encryptedMessage = await window.electronAPI.encrypt(
           message,
           latestPublicKey,
@@ -136,8 +145,6 @@ export default function WeChatConversationPage() {
           toUser: info?.fromUser || '',
           type: 1,
         });
-      } else {
-        console.error('No public key available');
       }
     } catch (error) {
       console.error('Encryption failed', error);
@@ -174,7 +181,7 @@ export default function WeChatConversationPage() {
           type="text"
           value={messageToSend}
           onChange={handleInputChange}
-          placeholder="Type a message..."
+          placeholder='Use this format to send image: {"imagePath":"<path to image>"} '
           className="flex-1 bg-gray-600 rounded-lg p-2 text-white outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button

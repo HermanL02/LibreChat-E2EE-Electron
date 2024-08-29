@@ -4,6 +4,11 @@ export interface IElectronAPI {
   importPersonalKeys: (publicKey: any, privateKey: any) => Promise<any>;
   // encryptor operations
   encrypt: (text: string, publicKey: string) => Promise<string>;
+  encryptPhoto: (photoPath: string, publicKey: string) => Promise<any>;
+  decryptPhoto: (
+    encryptedPhotoPath: string,
+    privateKey: string,
+  ) => Promise<any>;
   decrypt: (encryptedText: string, privateKey: string) => Promise<string>;
   generateKeyPair: () => Promise<{ publicKey: string; privateKey: string }>;
   getAllFriends: () => Promise<any[]>;
@@ -15,6 +20,7 @@ export interface IElectronAPI {
   installWeChat: () => Promise<any>;
   receiveMessage: (callback: any) => Promise<any>;
   sendMessage: (message: any) => Promise<any>;
+  sendImage: (message: any) => Promise<any>;
   getContact: () => Promise<any>;
   getLoginInfo: () => Promise<any>;
 }

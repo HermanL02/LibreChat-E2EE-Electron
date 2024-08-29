@@ -171,14 +171,15 @@ export default class HookDirect {
     messageinfo: SendImageHookSettings,
   ): Promise<SendImageHookResponse | { error: string }> => {
     try {
-      // Construct Body
+      // Encrypt Image
+
       const requestBody = {
         wxid: messageinfo.wxid,
-        msg: messageinfo.imagePath,
+        filePath: messageinfo.imagePath,
       };
       console.log(requestBody);
       const response: AxiosResponse<SendImageHookResponse> = await axios.post(
-        'http://0.0.0.0:19088/api/?type=5',
+        'http://0.0.0.0:19088/api/?type=6',
         requestBody,
       );
       console.log(response);

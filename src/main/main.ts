@@ -31,32 +31,21 @@ const server = new Server((socket) => {
     console.log(globalAny.hooked);
     console.log('Received data:', data.toString());
     // Convert buffer to string
-    const dataString = data.toString();
 
-    // Split the string at the double newline to separate headers from body
-    const parts = dataString.split('\r\n\r\n');
-
-    if (parts.length > 1) {
-      const jsonPart = parts[1]; // The JSON body will be after the double newline
-
-      try {
-        const jsonData = JSONBig.parse(jsonPart);
-        console.log('Extracted JSON:', jsonData);
-        console.log(BigInt(jsonData.msgId).toString());
-        // You can now work with the JSON data
-        // For example, you could send it to the mainWindow in Electron:
-        if (mainWindow) {
-          mainWindow.webContents.send('displayMessage', jsonData);
-        }
-
-        socket.write('Message received\n');
-      } catch (error) {
-        console.error('Failed to parse JSON:', error);
-        socket.write('Error processing message\n');
+    try {
+      const jsonData = JSONBig.parse(data.toString());
+      console.log('Extracted JSON:', jsonData);
+      console.log(BigInt(jsonData.msgId).toString());
+      // You can now work with the JSON data
+      // For example, you could send it to the mainWindow in Electron:
+      if (mainWindow) {
+        mainWindow.webContents.send('displayMessage', jsonData);
       }
-    } else {
-      console.log('No JSON body found in the received data');
-      socket.write('No JSON body found\n');
+
+      socket.write('Message received\n');
+    } catch (error) {
+      console.error('Failed to parse JSON:', error);
+      socket.write('Error processing message\n');
     }
   });
 
@@ -97,9 +86,21 @@ ipcMain.handle('get-personal-keys', async () => {
 ipcMain.handle('encrypt', async (event, text, publicKey) => {
   return Encryptor.encrypt(text, publicKey);
 });
+ipcMain.handle(
+  'encrypt-photo',
+  async (event, photoPath: string, publicKey: string) => {
+    return Encryptor.encryptPhoto(photoPath, publicKey);
+  },
+);
 ipcMain.handle('decrypt', async (event, text, privateKey) => {
   return Encryptor.decrypt(text, privateKey);
 });
+ipcMain.handle(
+  'decrypt-photo',
+  async (event, encryptedPhotoPath: string, privateKey: string) => {
+    return Encryptor.decryptPhoto(encryptedPhotoPath, privateKey);
+  },
+);
 ipcMain.handle('check-wechat-login', async () => {
   const returndata = await HookDirect.checkLogin();
   return returndata;
@@ -116,6 +117,9 @@ ipcMain.handle('anti-wechat-upgrade', async () => {
 ipcMain.handle('send-msg-hook', async (event, sendMsgHookSettings) => {
   console.log(sendMsgHookSettings);
   return HookDirect.sendMsg(sendMsgHookSettings);
+});
+ipcMain.handle('send-image-hook', async (event, sendImageHookSettings) => {
+  return HookDirect.sendImage(sendImageHookSettings);
 });
 ipcMain.handle('get-contact', async () => {
   return HookDirect.getContactList();

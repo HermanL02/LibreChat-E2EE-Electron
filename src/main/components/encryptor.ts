@@ -32,7 +32,10 @@ export default class Encryptor {
   }
 
   static encryptPhoto(photoPath: string, publicKey: string): string {
+    // Read the photo file
     const photoBuffer = fs.readFileSync(photoPath);
+
+    // Encrypt the photo using the public key
     const encrypted = crypto.publicEncrypt(
       {
         key: publicKey,
@@ -40,13 +43,26 @@ export default class Encryptor {
       },
       photoBuffer,
     );
-    const tempPath = path.join(os.tmpdir(), 'encrypted_photo.enc');
+
+    // Generate a hash of the photo path and truncate it
+    const hash = crypto
+      .createHash('sha256')
+      .update(photoPath)
+      .digest('hex')
+      .slice(0, 12);
+    const tempPath = path.join(os.tmpdir(), `${hash}.enc`);
+
+    // Write the encrypted file to the temporary directory
     fs.writeFileSync(tempPath, encrypted);
+
     return tempPath;
   }
 
-  static decryptPhoto(encryptedPhoto: string, privateKey: string): string {
-    const encryptedBuffer = fs.readFileSync(encryptedPhoto);
+  static decryptPhoto(encryptedPhotoPath: string, privateKey: string): string {
+    // Read the encrypted file
+    const encryptedBuffer = fs.readFileSync(encryptedPhotoPath);
+
+    // Decrypt the file using the private key
     const decrypted = crypto.privateDecrypt(
       {
         key: privateKey,
@@ -54,9 +70,18 @@ export default class Encryptor {
       },
       encryptedBuffer,
     );
-    const outputPhotoPath = path.join(os.tmpdir(), 'decrypted_photo.jpg');
-    fs.writeFileSync(outputPhotoPath, decrypted);
-    return outputPhotoPath;
+
+    // Extract the original file name from the encrypted file name
+    const originalFileName = path.basename(encryptedPhotoPath, '.enc');
+    const outputPath = path.join(
+      path.dirname(encryptedPhotoPath),
+      originalFileName,
+    );
+
+    // Write the decrypted file with the original file name
+    fs.writeFileSync(outputPath, decrypted);
+
+    return outputPath;
   }
 
   static generateKeyPair(): { publicKey: string; privateKey: string } {
