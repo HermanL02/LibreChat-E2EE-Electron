@@ -33,12 +33,14 @@ interface SendMsgHookSettings {
 interface SendImageHookSettings {
   wxid: string;
   imagePath: string;
+  encryptedKey: string;
 }
 interface SendMsgHookResponse {
   code: number;
   result: string;
 }
 interface SendImageHookResponse {
+  [x: string]: any;
   code: number;
   result: string;
 }
@@ -183,8 +185,27 @@ export default class HookDirect {
       );
       // Check Response
       if (response && response.data) {
-        console.log(response.data);
-        return response.data;
+        const fileName = path.basename(messageinfo.imagePath);
+
+        const json = {
+          encryptedKey: messageinfo.encryptedKey,
+          msgID: response.data.msgId,
+          fileName,
+        };
+        const messageRequestBody = {
+          wxid: messageinfo.wxid,
+          msg: JSON.stringify(json),
+        };
+
+        // eslint-disable-next-line no-promise-executor-return
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const responseMessage: AxiosResponse<SendMsgHookResponse> =
+          await axios.post(
+            'http://0.0.0.0:19088/api/?type=2',
+            messageRequestBody,
+          );
+
+        return responseMessage.data;
       }
 
       throw new Error('No response from API');
@@ -196,17 +217,20 @@ export default class HookDirect {
   static getMsgAttachment = async (
     msgId: string,
   ): Promise<getMsgAttachmentHookResponse | { error: string }> => {
+    console.log('GMA Called');
     try {
       // Construct Body
       const requestBody = {
         msgId,
       };
-
+      console.log(`Getting msgID ${msgId}`);
       const response: AxiosResponse<getMsgAttachmentHookResponse> =
         await axios.post('http://0.0.0.0:19088/api/?type=56', requestBody);
 
       // Check Response
-      if (response && response.data) {
+      if (response) {
+        console.log('111111111111');
+        console.log(response);
         return response.data;
       }
 

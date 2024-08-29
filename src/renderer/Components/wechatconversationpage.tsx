@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
+
+import path from 'path-browserify';
 import { useWeChatMessages } from '../WeChatMessageContext';
 import usePersonalKeys from './subComponents/usePersonalKeys';
 
@@ -8,7 +10,7 @@ type Message = {
   createTime: number;
   displayFullContent: string;
   fromUser: string;
-  msgId: number;
+  msgId: string;
   msgSequence: number;
   pid: number;
   signature: string;
@@ -36,18 +38,26 @@ export default function WeChatConversationPage() {
   useEffect(() => {
     scrollToBottom();
   }, [decryptedMessages]);
+  const lastProcessedMsgIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     const filterAndDecryptMessages = async () => {
-      const filteredMessages = messages.filter(
+      const newMessages = messages.filter(
         (message) =>
-          message.fromUser === info?.fromUser ||
-          message.toUser === info?.fromUser,
+          Number(message.msgId) > (lastProcessedMsgIdRef.current || 0) &&
+          (message.fromUser === info?.fromUser ||
+            message.toUser === info?.fromUser),
       );
+
+      if (newMessages.length === 0) return;
+
+      const loginInfo = await window.electronAPI.getLoginInfo();
       const decrypted = await Promise.all(
-        filteredMessages.map(async (message) => {
+        newMessages.map(async (message) => {
           try {
             if (message?.path) {
+              console.log('GMA PRELOAD CALLEd');
+              await window.electronAPI.getMsgAttachment(message.msgId);
               return null;
             }
             const decryptedContent = await window.electronAPI.decrypt(
@@ -58,24 +68,56 @@ export default function WeChatConversationPage() {
             return { ...message, content: decryptedContent };
           } catch (error) {
             try {
-              const { encryptedPhotoPath, encryptedKey } = JSON.parse(
-                message.content,
+              const { fileName, encryptedKey } = JSON.parse(message.content);
+              console.log(loginInfo);
+              console.log(fileName);
+              // TODO: wxhelper saving wrong name
+              // const fullPath = path.join(
+              //   loginInfo.data.currentDataPath,
+              //   'wxhelper',
+              //   'file',
+              //   fileName,
+              // );
+              const currentDate = new Date();
+              const year = currentDate.getFullYear();
+              const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 获取月份并补齐两位
+
+              const currentYearMonth = `${year}-${month}`;
+
+              const fullPath = path.join(
+                loginInfo.data.currentDataPath,
+                'FileStorage',
+                'File',
+                currentYearMonth,
+                fileName,
               );
-              const decryptedPhotoPath = await window.electronAPI.decryptPhoto(
-                encryptedPhotoPath,
-                latestPersonalKey.privateKey,
-                encryptedKey,
-              );
-              const json = { imgPath: decryptedPhotoPath };
+              const decryptedPhotoBase64 =
+                await window.electronAPI.decryptPhoto(
+                  fullPath,
+                  latestPersonalKey.privateKey,
+                  encryptedKey,
+                );
+              console.log(`got decryptedPhotoPath path`);
+              const json = { imgB64: decryptedPhotoBase64 };
               return { ...message, content: JSON.stringify(json) };
             } catch (err) {
+              console.log(BigInt(message.msgId).toString());
               console.log(err);
             }
             return { ...message, content: message.content };
           }
         }),
       );
-      setDecryptedMessages(decrypted.filter((msg) => msg !== null));
+
+      setDecryptedMessages((prev) => [
+        ...prev,
+        ...decrypted.filter((msg) => msg !== null),
+      ]);
+
+      const lastMessage = newMessages[newMessages.length - 1];
+      if (lastMessage) {
+        lastProcessedMsgIdRef.current = Number(lastMessage.msgId);
+      }
     };
 
     filterAndDecryptMessages();
@@ -187,12 +229,31 @@ export default function WeChatConversationPage() {
       <h1 className="text-2xl font-bold mb-4">Chat Page</h1>
       <div className="bg-gray-700 p-4 rounded-lg shadow-lg overflow-y-auto h-96 mb-4">
         {/* Display messages */}
-        {decryptedMessages.map((msg: Message) => (
-          <p key={msg.msgId} className="border-b border-gray-600 mb-2 pb-2">
-            <strong className="text-blue-400">{msg.fromUser}:</strong>{' '}
-            {msg.content}
-          </p>
-        ))}
+        {decryptedMessages.map((msg: Message) => {
+          const contentObj = (() => {
+            try {
+              return JSON.parse(msg.content);
+            } catch (e) {
+              return null;
+            }
+          })();
+
+          return (
+            <div key={msg.msgId} className="border-b border-gray-600 mb-2 pb-2">
+              <strong className="text-blue-400">{msg.fromUser}:</strong>{' '}
+              {contentObj && contentObj.imgB64 ? (
+                // eslint-disable-next-line jsx-a11y/img-redundant-alt
+                <img
+                  src={contentObj.imgB64}
+                  alt="Message Image"
+                  className="mt-2 max-w-full rounded"
+                />
+              ) : (
+                <p>{msg.content}</p>
+              )}
+            </div>
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
       <form onSubmit={handleSubmit} className="flex gap-2">
@@ -200,7 +261,7 @@ export default function WeChatConversationPage() {
           type="text"
           value={messageToSend}
           onChange={handleInputChange}
-          placeholder='Use this format to send image: {"imagePath":"<path to image>"} '
+          placeholder='Use this format to send image:{"imagePath": "C:\\Users\\liang\\Desktop\\Master Presentation Prep.jpg" } '
           className="flex-1 bg-gray-600 rounded-lg p-2 text-white outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button

@@ -101,7 +101,7 @@ export default class Encryptor {
   ): string {
     // Decrypt the symmetric key using the private key
     const symmetricKey = this.decrypt2(encryptedKey, privateKey);
-
+    console.log('99999999999999999');
     // Read the encrypted photo file
     const encryptedBuffer = fs.readFileSync(encryptedPhotoPath);
 
@@ -125,7 +125,22 @@ export default class Encryptor {
 
     // Write the decrypted photo to the output path
     fs.writeFileSync(outputPath, decryptedPhoto);
-    return outputPath;
+    function getBase64FromFile(filePath: fs.PathOrFileDescriptor) {
+      try {
+        const fileBuffer = fs.readFileSync(filePath);
+        const base64String = fileBuffer.toString('base64');
+
+        return `data:image/jpeg;base64,${base64String}`;
+      } catch (err) {
+        console.error('Failed to read file:', err);
+        return null;
+      }
+    }
+
+    const base64Image = getBase64FromFile(outputPath);
+
+    console.log(base64Image);
+    return base64Image || '';
   }
 
   static generateKeyPair(): { publicKey: string; privateKey: string } {

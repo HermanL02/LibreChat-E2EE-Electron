@@ -17,6 +17,7 @@ export interface IElectronAPI {
   getPersonalKeys: () => Promise<any>;
   checkWechatLogin: () => Promise<any>;
   hookWechat: (hookSettings: any) => Promise<any>;
+  getMsgAttachment: (msgId: string) => Promise<any>;
   antiWeChatUpgrade: () => Promise<any>;
   installWeChat: () => Promise<any>;
   receiveMessage: (callback: any) => Promise<any>;

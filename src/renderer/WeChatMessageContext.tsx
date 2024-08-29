@@ -9,7 +9,7 @@ type Message = {
   createTime: number;
   displayFullContent: string;
   fromUser: string;
-  msgId: number;
+  msgId: string;
   msgSequence: number;
   pid: number;
   signature: string;
@@ -54,9 +54,9 @@ export const WeChatMessageProvider: React.FC<{ children: React.ReactNode }> = ({
         try {
           const content = JSON.parse(message.content);
           const { publicKey, userName } = content;
-          console.log('Username', userName);
 
           if (publicKey) {
+            console.log('Username', userName);
             // In case the message is sent by myself
             // eslint-disable-next-line eqeqeq
             if (message.fromUser != '' && message.fromUser != myWXID) {

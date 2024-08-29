@@ -30,8 +30,9 @@ const server = new Server((socket) => {
   socket.on('data', (data) => {
     try {
       const jsonData = JSONBig.parse(data.toString());
+      jsonData.msgId = String(jsonData.msgId);
       // console.log('Extracted JSON:', jsonData);
-      // console.log(BigInt(jsonData.msgId).toString());
+      console.log(BigInt(jsonData.msgId).toString());
       // You can now work with the JSON data
       // For example, you could send it to the mainWindow in Electron:
       if (mainWindow) {
@@ -109,6 +110,10 @@ ipcMain.handle('check-wechat-login', async () => {
 ipcMain.handle('hook-wechat', async (event, hookSettings) => {
   return HookDirect.hookMessage(hookSettings);
 });
+ipcMain.handle('get-msg-attachment', async (event, msgId) => {
+  return HookDirect.getMsgAttachment(msgId);
+});
+
 ipcMain.handle('install-wechat', async () => {
   return HookDirect.installWeChat();
 });
