@@ -17,8 +17,18 @@ type Message = {
   toUser: string;
   type: number;
 };
-
+async function hashData(data: string) {
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 export default function WeChatConversationPage() {
+  const [latestPublicKeyHash, setLatestPublicKeyHash] = useState<string>('');
+  const [latestPersonalKeyHash, setLatestPersonalKeyHash] =
+    useState<string>('');
   const location = useLocation();
   const info = location.state?.info as Message | undefined;
   const { messages, addMessage } = useWeChatMessages();
@@ -26,7 +36,7 @@ export default function WeChatConversationPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { latestPersonalKey } = usePersonalKeys();
   const [messageToSend, setMessageToSend] = useState('');
-
+  const [currentPath, setCurrentPath] = useState('');
   const scrollToBottom = () => {
     messagesEndRef?.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -41,35 +51,55 @@ export default function WeChatConversationPage() {
   const lastProcessedMsgIdRef = useRef<number | null>(null);
 
   useEffect(() => {
+    const calculateHashes = async () => {
+      if (info?.content) {
+        const jsonfiedInfoContent = JSON.parse(info.content);
+        const { publicKey } = jsonfiedInfoContent;
+        const publicKeyHash = await hashData(publicKey);
+        setLatestPublicKeyHash(publicKeyHash);
+      }
+
+      const personalKeyHash = await hashData(latestPersonalKey.publicKey);
+      setLatestPersonalKeyHash(personalKeyHash);
+    };
+
+    calculateHashes();
+  }, [info, latestPersonalKey.publicKey]);
+  useEffect(() => {
+    const updateCurrentPath = async () => {
+      const loginInfo = await window.electronAPI.getLoginInfo();
+      setCurrentPath(loginInfo.data.currentDataPath);
+    };
+    updateCurrentPath();
+  }, []);
+  useEffect(() => {
     const filterAndDecryptMessages = async () => {
-      const newMessages = messages.filter(
+      const filteredMessages = messages.filter(
         (message) =>
-          Number(message.msgId) > (lastProcessedMsgIdRef.current || 0) &&
-          (message.fromUser === info?.fromUser ||
-            message.toUser === info?.fromUser),
+          message.fromUser === info?.fromUser ||
+          message.toUser === info?.fromUser,
       );
 
-      if (newMessages.length === 0) return;
-
-      const loginInfo = await window.electronAPI.getLoginInfo();
       const decrypted = await Promise.all(
-        newMessages.map(async (message) => {
+        filteredMessages.map(async (message) => {
           try {
             if (message?.path) {
-              console.log('GMA PRELOAD CALLEd');
+              console.log('GMA PRELOAD CALLED');
+              console.log(message.msgId);
               await window.electronAPI.getMsgAttachment(message.msgId);
               return null;
             }
+
             const decryptedContent = await window.electronAPI.decrypt(
               message.content,
               latestPersonalKey.privateKey,
             );
-
+            console.log('decrypted');
             return { ...message, content: decryptedContent };
           } catch (error) {
             try {
               const { fileName, encryptedKey } = JSON.parse(message.content);
-              console.log(loginInfo);
+
               console.log(fileName);
               // TODO: wxhelper saving wrong name
               // const fullPath = path.join(
@@ -85,7 +115,7 @@ export default function WeChatConversationPage() {
               const currentYearMonth = `${year}-${month}`;
 
               const fullPath = path.join(
-                loginInfo.data.currentDataPath,
+                currentPath,
                 'FileStorage',
                 'File',
                 currentYearMonth,
@@ -101,27 +131,26 @@ export default function WeChatConversationPage() {
               const json = { imgB64: decryptedPhotoBase64 };
               return { ...message, content: JSON.stringify(json) };
             } catch (err) {
-              console.log(BigInt(message.msgId).toString());
               console.log(err);
+              return { ...message, content: message.content };
             }
-            return { ...message, content: message.content };
           }
         }),
       );
 
-      setDecryptedMessages((prev) => [
-        ...prev,
-        ...decrypted.filter((msg) => msg !== null),
-      ]);
-
-      const lastMessage = newMessages[newMessages.length - 1];
-      if (lastMessage) {
-        lastProcessedMsgIdRef.current = Number(lastMessage.msgId);
-      }
+      setDecryptedMessages(
+        decrypted.filter((msg): msg is Message => msg !== null),
+      );
     };
 
     filterAndDecryptMessages();
-  }, [messages, info, latestPersonalKey.privateKey]);
+  }, [
+    messages,
+    info,
+    latestPersonalKey.privateKey,
+    decryptedMessages,
+    currentPath,
+  ]);
 
   const handleChangeTextToPubKey = async (
     e: React.FormEvent<HTMLFormElement>,
@@ -170,9 +199,12 @@ export default function WeChatConversationPage() {
           imagePath: encryptedPath,
           encryptedKey,
         });
-
+        console.log('xxxxxxxxxxxxxxx');
+        console.log(response.msgId);
+        const currentnumber = lastProcessedMsgIdRef.current || 0;
+        const tempMsgID = (currentnumber + 1).toString();
         addMessage({
-          msgId: response.msgId,
+          msgId: tempMsgID,
           fromUser: 'me',
           content: message,
           createTime: Date.now(),
@@ -194,6 +226,7 @@ export default function WeChatConversationPage() {
           wxid: info?.fromUser,
           msg: encryptedMessage,
         });
+
         addMessage({
           msgId: response.msgId,
           fromUser: 'me',
@@ -228,6 +261,15 @@ export default function WeChatConversationPage() {
     <div className="min-h-screen bg-gray-800 text-white p-6">
       <h1 className="text-2xl font-bold mb-4">Chat Page</h1>
       <div className="bg-gray-700 p-4 rounded-lg shadow-lg overflow-y-auto h-96 mb-4">
+        {/* Display the hashes */}
+        <div className="mb-4">
+          <p>
+            <strong>Latest Public Key Hash:</strong> {latestPublicKeyHash}
+          </p>
+          <p>
+            <strong>Latest Personal Key Hash:</strong> {latestPersonalKeyHash}
+          </p>
+        </div>
         {/* Display messages */}
         {decryptedMessages.map((msg: Message) => {
           const contentObj = (() => {
