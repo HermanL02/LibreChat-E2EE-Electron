@@ -9,7 +9,6 @@ import ContactList from '../Components/contactlist';
 import FunctionList from '../Components/functionlist';
 import AddFriendPage from '../Components/addfriend';
 import PersonalInfo from '../Components/personalinfo';
-import Navbar from '../Components/navbar';
 // Define Contact List's Prop Types
 
 function ContentArea() {
@@ -31,7 +30,6 @@ export default function Main() {
   return (
     <AppStateProvider>
       <div className="flex flex-col bg-gray-800 text-white">
-        <Navbar />
         <div className="flex flex-grow">
           <div className="flex flex-col bg-gray-700 p-4 shadow-lg rounded-lg w-1/5">
             <p className="text-sm font-semibold mb-4">Functions</p>
